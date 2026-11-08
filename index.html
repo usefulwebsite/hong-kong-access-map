@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>順利邨無障礙地圖</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden; }
+        #header { height: 50px; background: #2c3e50; color: white; line-height: 50px; text-align: center; font-weight: bold; font-size: 16px; }
+        #map { height: calc(100% - 110px); width: 100%; z-index: 1; }
+        .leaflet-routing-container { display: none !important; }
+        #route-panel {
+            position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 350px; background: white; padding: 15px;
+            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        #route-panel select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; background-color: #f9f9f9; }
+        #route-panel button { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        #route-panel button:hover { background-color: #2980b9; }
+        .map-label { background: transparent; border: none; box-shadow: none; color: #000; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff; }
+        .map-label::before { display: none; }
+        #bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; }
+        #bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #7f8c8d; font-size: 12px; }
+        #bottom-nav a.active { color: #3498db; font-weight: bold; }
+        #bottom-nav a span.icon { font-size: 22px; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+    <div id="header">♿ 順利邨無障礙地圖</div>
+    <div id="map"></div>
+
+    <div id="route-panel">
+        <select id="start-select"><option value="">-- 請選擇起點 --</option></select>
+        <select id="end-select"><option value="">-- 請選擇終點 --</option></select>
+        <button onclick="planRoute()">🚶 規劃步行路線</button>
+    </div>
+
+    <div id="bottom-nav">
+        <a href="index.html" class="active"><span class="icon">🗺️</span><span>地圖</span></a>
+        <a href="list.html"><span class="icon">📋</span><span>列表</span></a>
+        <a href="about.html"><span class="icon">ℹ️</span><span>關於</span></a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    
+    <script>
+        const map = L.map('map').setView([22.3321, 114.2255], 17);
+        L.tileLayer('https://mapapi.geodata.gov.hk/gs/api/v1.0.0/xyz/basemap/wgs84/{z}/{x}/{y}.png', { maxZoom: 20 }).addTo(map);
+
+        const places = [
+            { name: "商場 - 順利邨道入口", lat: 22.3319, lng: 114.2248, icon: "⚠️", desc: "通道寬闊，一邊有一級梯級，另一邊設有斜道輔助。" },
+            { name: "商場 - 公園入口", lat: 22.33070, lng: 114.22608, icon: "✅", desc: "寬闊斜道，設有觸覺引路帶在斜路上伸延。" },
+            { name: "商場 - 往3樓電梯", lat: 22.33079, lng: 114.22638, icon: "🛗", desc: "由4級梯級和自動電梯組成。無發聲裝置，輪椅不可用。" },
+            { name: "商場 - 往3樓長斜道", lat: 22.3320, lng: 114.2250, icon: "⚠️", desc: "多段長斜道，斜度略高，底頂無觸覺警告帶。" },
+            { name: "順利停車場 - 出入口", lat: 22.3331, lng: 114.2245, icon: "❌", desc: "出入口處有兩級梯級阻礙，兩邊無扶手。" },
+            { name: "順利天主教中學 - 正門", lat: 22.3328, lng: 114.2267, icon: "❌", desc: "寬闊的梯級通道，無升降設備輔助。" },
+            { name: "順利邨公園", lat: 22.33019, lng: 114.22538, icon: "🌳", desc: "設有暢通易達洗手間及觸覺引路帶。" }
+        ];
+
+        const startSelect = document.getElementById('start-select');
+        const endSelect = document.getElementById('end-select');
+
+        places.forEach((place, index) => {
+            const customIcon = L.divIcon({
+                html: '<div style="font-size:24px; text-align:center; text-shadow: 0 0 4px white;">' + place.icon + '</div>',
+                className: '', iconSize: [30, 30], iconAnchor: [15, 15]
+            });
+
+            L.marker([place.lat, place.lng], { icon: customIcon }).addTo(map)
+                .bindPopup('<div style="font-weight:bold; font-size:14px; margin-bottom:5px;">' + place.name + '</div><div style="color:#555; font-size:13px; line-height:1.4;">' + place.desc + '</div>')
+                .bindTooltip(place.name, { permanent: true, direction: 'right', className: 'map-label', offset: [15, 0] });
+
+            const opt1 = document.createElement("option");
+            opt1.text = place.name; opt1.value = index;
+            startSelect.appendChild(opt1);
+
+            const opt2 = document.createElement("option");
+            opt2.text = place.name; opt2.value = index;
+            endSelect.appendChild(opt2);
+        });
+
+        let routingControl = null;
+
+        function planRoute() {
+            const startIndex = startSelect.value;
+            const endIndex = endSelect.value;
+
+            if (startIndex === "" || endIndex === "") return alert("請選擇起點和終點！");
+            if (startIndex === endIndex) return alert("起點和終點不能相同！");
+
+            const startPoint = places[startIndex];
+            const endPoint = places[endIndex];
+
+            if (routingControl) map.removeControl(routingControl);
+
+            routingControl = L.Routing.control({
+                waypoints: [L.latLng(startPoint.lat, startPoint.lng), L.latLng(endPoint.lat, endPoint.lng)],
+                router: L.Routing.osrmv1({ serviceUrl: 'https://routing.openstreetmap.de/routed-foot/route/v1' }),
+                lineOptions: { styles: [{color: '#2980b9', weight: 6, opacity: 0.8}] },
+                addWaypoints: false,
+                show: false
+            }).addTo(map);
+        }
+    </script>
+</body>
+</html>

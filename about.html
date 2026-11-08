@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>關於我們</title>
+    <style>
+        body { margin: 0; font-family: sans-serif; background: #f5f6fa; padding-bottom: 70px; }
+        #header { height: 50px; background: #2c3e50; color: white; line-height: 50px; text-align: center; font-weight: bold; font-size: 16px; }
+        .content { padding: 20px; max-width: 600px; margin: 20px auto; background: #fff; border-radius: 8px; line-height: 1.6; font-size: 14px; color: #333; }
+        
+        #bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; }
+        #bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #7f8c8d; font-size: 12px; }
+        #bottom-nav a.active { color: #3498db; font-weight: bold; }
+        #bottom-nav a span.icon { font-size: 22px; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+    <div id="header">關於本專案</div>
+    <div class="content">
+        <p><b>順利邨無障礙地圖</b> 是一個專為輪椅使用者、長者及行動不便人士設計的資訊平台。</p>
+        <p>我們透過實地考察，將順利邨附近的設施進行了標註。</p>
+        <p>地圖上的圖示含義：</p>
+        <ul>
+            <li>✅ <b>良好</b>：輪椅可安全通過。</li>
+            <li>⚠️ <b>有障礙</b>：有斜道但存在缺陷，需小心或繞行。</li>
+            <li>❌ <b>不可達</b>：有梯級阻礙，輪椅完全不可達。</li>
+        </ul>
+        <p>希望這個工具能幫助大家更方便地出行！</p>
+    </div>
+
+    <div id="bottom-nav">
+        <a href="index.html"><span class="icon">🗺️</span><span>地圖</span></a>
+        <a href="list.html"><span class="icon">📋</span><span>列表</span></a>
+        <a href="about.html" class="active"><span class="icon">ℹ️</span><span>關於</span></a>
+    </div>
+</body>
+</html>
