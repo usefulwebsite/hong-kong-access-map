@@ -45,7 +45,6 @@
         .suggestions li.item:hover, .suggestions li.item.active { background: #eaf2f9; border-left-color: #1f6fa8; }
         .suggestions .region-tag { font-size: 11px; color: #7a8a95; margin-left: 8px; padding: 1px 6px; background: #eef1f4; border-radius: 10px; }
         
-        /* 新增：路線偏好區塊樣式 */
         .pref-box {
             margin-top: 4px; padding: 12px; background: #f0f4f8; border-radius: 8px;
             font-size: 13px; color: #2c3e50; border: 1px solid #dce4eb;
@@ -74,7 +73,6 @@
             display: flex; align-items: flex-start; gap: 10px; font-size: 13px;
         }
         .step-item:last-child { border-bottom: none; }
-        .step-item.is-warning { background: #fff8e1; }
         .step-icon { font-size: 16px; min-width: 24px; text-align: center; margin-top: 2px; }
         .step-text { font-weight: bold; color: #2c3e50; }
         .step-meta { color: #7a8a95; font-size: 12px; margin-top: 3px; }
@@ -108,7 +106,6 @@
         #bottom-nav a.active { color: #1f6fa8; font-weight: bold; }
         #bottom-nav a .icon { font-size: 22px; }
 
-        /* Popup 內無障礙細節樣式 */
         .acc-panel { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #c3ccd3; }
         .acc-title { font-weight: bold; color: #1f6fa8; margin-bottom: 6px; font-size: 13px; }
         .acc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 12px; color: #444; }
@@ -147,7 +144,6 @@
                 <ul id="end-suggestions" class="suggestions" hidden></ul>
             </div>
 
-            <!-- 新增：輪椅專屬路線偏好 -->
             <div class="pref-box">
                 <div class="pref-title">♿ 專屬路線偏好</div>
                 <label>
@@ -158,7 +154,7 @@
                     <input type="checkbox" id="avoid-steep" checked>
                     <span>⚠️ 嚴格避免斜度 > 1:12 的斜道</span>
                 </label>
-                <div class="hint">💡 勾選後，搜尋結果與路線規劃會自動過濾不適合的選項。</div>
+                <div class="hint">💡 勾選後，搜尋結果會自動過濾不適合的選項。</div>
             </div>
 
             <button type="submit" id="plan-btn">♿ 規劃無障礙路線</button>
@@ -179,11 +175,7 @@
             maxZoom: 20, attribution: '地圖資料：地政總署 | Leaflet'
         }).addTo(map);
 
-        // ============================================================
-        // 擴充版 places 資料：加入 accessibility 無障礙細節參數
-        // ============================================================
         const places = [
-            // === 順利邨 ===
             { region: '順利邨', cat: '無障礙通道', name: '順利邨街市無障礙斜道', lat: 22.33170, lng: 114.22510, icon: '♿', keywords: ['通道', '斜道', '街市'],
               accessibility: { rampGradient: '1:12', surface: '平滑防滑地磚', hasHandrail: true, hasTactile: true, isCovered: false },
               desc: '連接順利邨道與街市入口的寬闊斜道，兩旁設有雙層扶手，底頂設有觸覺警告帶。' },
@@ -256,8 +248,6 @@
             { region: '順利邨', cat: '休憩', name: '順利邨公園（往體育館斜道入口）', lat: 22.33030, lng: 114.22560, icon: '✅', keywords: ['公園', '體育館'],
               accessibility: { rampGradient: '1:12', surface: '平滑', isCovered: false },
               desc: '從公園大閘進入後，一邊設斜道通往體育館正門旁。' },
-
-            // === 觀塘 ===
             { region: '觀塘', cat: '無障礙通道', name: '裕民坊 YM² 無障礙正門', lat: 22.31390, lng: 114.22350, icon: '♿', keywords: ['通道', '商場', 'YM2', '裕民坊'],
               accessibility: { doorWidth: '自動門', surface: '平滑大理石', turningSpace: '充足', isCovered: true },
               desc: '裕民坊 YM² 商場正門設有寬闊平坦的無障礙通道，採用自動玻璃趟門。' },
@@ -305,9 +295,6 @@
               desc: '主要入口設有斜道，兩邊有扶手，底頂有觸覺警告帶。' }
         ];
 
-        // ============================================================
-        // 地圖標記：根據 accessibility 參數調整視覺樣式
-        // ============================================================
         const markerMap = {};
         places.forEach(place => {
             const isAccess = place.cat === '無障礙通道' || place.icon === '♿';
@@ -324,7 +311,6 @@
                 className: '', iconSize: iconBg ? [36, 36] : [30, 30], iconAnchor: iconBg ? [18, 18] : [15, 15], popupAnchor: [0, -15]
             });
 
-            // 產生無障礙細節面板 HTML
             const accPanelHtml = buildAccessibilityPanel(place);
 
             const marker = L.marker([place.lat, place.lng], { icon: customIcon, title: place.name })
@@ -344,12 +330,10 @@
             markerMap[place.name] = marker;
         });
 
-        // 產生無障礙細節面板 HTML 的輔助函數
         function buildAccessibilityPanel(place) {
             const acc = place.accessibility;
             if (!acc) return '';
 
-            // 若明確標示為不可通行
             if (acc.isAccessible === false) {
                 return `
                 <div class="acc-panel">
@@ -387,9 +371,6 @@
             </div>`;
         }
 
-        // ============================================================
-        // 面板切換
-        // ============================================================
         const toggleBtn = document.getElementById('search-toggle-btn');
         const routePanel = document.getElementById('route-panel');
         const closePanelBtn = document.getElementById('close-panel-btn');
@@ -404,9 +385,6 @@
             toggleBtn.style.display = 'flex';
         });
 
-        // ============================================================
-        // GPS 定位
-        // ============================================================
         let userLocationMarker = null;
         let userAccuracyCircle = null;
 
@@ -438,22 +416,15 @@
             );
         });
 
-        // ============================================================
-        // 自動完成搜尋（含輪椅偏好過濾）
-        // ============================================================
         const AREA_TERMS = { '順利邨': '順利邨', '順利': '順利邨', '觀塘': '觀塘', 'kwun tong': '觀塘' };
 
-        // 判斷某個 place 是否符合目前的輪椅偏好
         function matchesWheelchairPref(place) {
             const avoidSteep = document.getElementById('avoid-steep')?.checked;
             const preferCovered = document.getElementById('prefer-covered')?.checked;
             const acc = place.accessibility || {};
 
-            // 明確不可通行的地點一律過濾
             if (acc.isAccessible === false) return false;
-            // 避免陡峭
             if (avoidSteep && acc.isSteep) return false;
-            // 優先有上蓋：只保留有上蓋的地點
             if (preferCovered && acc.isCovered === false) return false;
             return true;
         }
@@ -523,7 +494,6 @@
 
             document.addEventListener('click', (e) => { if (!inputEl.contains(e.target) && !suggestionsEl.contains(e.target)) hide(); });
 
-            // 當偏好勾選改變時，若目前輸入框有文字，重新搜尋
             ['avoid-steep', 'prefer-covered'].forEach(id => {
                 document.getElementById(id).addEventListener('change', () => {
                     if (inputEl.value.trim()) search(inputEl.value);
@@ -554,9 +524,6 @@
                 .replace(/公里/g, '公里');
         }
 
-        // ============================================================
-        // 路線規劃（含輪椅進階 API 參數）
-        // ============================================================
         document.getElementById('route-panel').addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultEl = document.getElementById('route-result');
@@ -574,28 +541,13 @@
 
             if (currentRouteLayer) map.removeLayer(currentRouteLayer);
 
-            // 讀取偏好
             const avoidSteep = document.getElementById('avoid-steep').checked;
             const preferCovered = document.getElementById('prefer-covered').checked;
 
             try {
-                // 建立輪椅專屬 API 選項
-                const wheelchairOptions = {
-                    wheelchair: {
-                        // 強制避免階梯、未鋪設路面、淺灘
-                        avoid_features: ['steps', 'unpaved', 'ford']
-                    }
-                };
-
-                // 若勾選「避免陡峭」，加入更多限制
-                if (avoidSteep) {
-                    wheelchairOptions.wheelchair.max_incline = 8; // 限制最大斜度為 8%
-                }
-
                 const response = await fetch('https://api.openrouteservice.org/v2/directions/wheelchair/geojson', {
                     method: 'POST',
                     headers: {
-                        // ⚠️ 安全提醒：此 API Key 暴露在前端，建議改用後端代理
                         'Authorization': 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6Ijg2MTJiYWIzMWIyYTRhMjRhNzFhMThmMTBiM2E3ZGIzIiwiaCI6Im11cm11cjY0In0=',
                         'Content-Type': 'application/json'
                     },
@@ -603,8 +555,7 @@
                         coordinates: [[start.lng, start.lat], [end.lng, end.lat]],
                         preference: 'recommended',
                         units: 'm',
-                        language: 'zh',
-                        options: wheelchairOptions
+                        language: 'zh'
                     })
                 });
 
@@ -647,7 +598,6 @@
                     const timeText = Math.round(step.duration / 60) + ' 分鐘';
                     const instruction = zhCNtoZHTW(step.instruction);
 
-                    // 檢查起點/終點是否為陡峭地點，加入警告提示
                     let accessTip = '';
                     if (start.accessibility?.isSteep || end.accessibility?.isSteep) {
                         accessTip = '<div class="step-access-tip" style="color:#d32f2f;">⚠️ 起點或終點附近斜道較陡，請注意安全</div>';
@@ -668,7 +618,6 @@
                 });
                 stepsHtml += '</div>';
 
-                // 路線偏好摘要
                 let prefSummary = '';
                 if (avoidSteep || preferCovered) {
                     const tags = [];
