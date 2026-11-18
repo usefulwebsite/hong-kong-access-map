@@ -326,9 +326,8 @@
             }
 
             try {
-                console.log('Requesting ORS API for:', start.name, 'to', end.name);
-                
-                const response = await fetch('https://api.openrouteservice.org/v2/directions/foot-wheelchair/geojson', {
+                // ✅ 修正：將 'foot-wheelchair' 改為正確的 'wheelchair'
+                const response = await fetch('https://api.openrouteservice.org/v2/directions/wheelchair/geojson', {
                     method: 'POST',
                     headers: {
                         'Authorization': 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6Ijg2MTJiYWIzMWIyYTRhMjRhNzFhMThmMTBiM2E3ZGIzIiwiaCI6Im11cm11cjY0In0=',
@@ -391,7 +390,6 @@
             } catch (error) {
                 console.error('Route planning error:', error);
                 
-                // 備用方案：如果 API 失敗，畫一條直線並顯示警告
                 if (currentRouteLayer) map.removeLayer(currentRouteLayer);
                 currentRouteLayer = L.polyline([[start.lat, start.lng], [end.lat, end.lng]], {
                     color: '#d32f2f',
@@ -407,7 +405,7 @@
                 } else if (error.message.includes('429')) {
                     friendlyMsg = '請求過於頻繁，已達到免費版每日/每分鐘限制，請稍後再試。';
                 } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    friendlyMsg = '網路連線失敗。如果您是本機打開 HTML 檔案，請嘗試使用「Live Server」等本地伺服器運行，或檢查網路。';
+                    friendlyMsg = '網路連線失敗。請確認網路正常，或嘗試使用本地伺服器 (Live Server) 運行。';
                 }
 
                 resultEl.innerHTML = `
