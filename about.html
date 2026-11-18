@@ -538,7 +538,7 @@
                     <span class="d-icon">🔵</span>
                     <div class="d-info">
                         <div class="d-name">AlipayHK 支付寶香港</div>
-                        <div class="d-desc">掃描 QR code 快速捐款</div>
+                        <div class="d-desc">透過電話號碼快速轉帳</div>
                     </div>
                     <span class="d-arrow">›</span>
                 </div>
@@ -581,39 +581,31 @@
         </div>
     </div>
 
-    <!-- AlipayHK QR Code 彈窗（使用圖片） -->
+    <!-- AlipayHK 轉帳彈窗（純文字版，無需圖片檔案） -->
     <div class="modal-overlay" id="alipay-modal">
         <div class="modal" style="text-align: center;">
             <h3 style="justify-content: center;">🔵 AlipayHK 捐款</h3>
-            <p style="font-size: 13px; color: #555; margin-bottom: 8px;">
-                用 AlipayHK App 掃描下方收款碼
+            <p style="font-size: 13px; color: #555; margin: 12px 0;">
+                請在 AlipayHK App 中搜尋以下電話號碼進行轉帳
             </p>
 
-            <img src="alipay-qr.png" 
-                 alt="AlipayHK 收款碼"
-                 style="width: 220px; height: 220px; object-fit: contain; 
-                        border: 3px solid #1e88e5; border-radius: 12px;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                        margin: 16px 0;"
-                 onerror="this.style.display='none'; document.getElementById('qr-fallback').style.display='block';">
-
-            <div id="qr-fallback" style="display:none; padding: 20px; color: #d32f2f; font-size: 13px; line-height: 1.6;">
-                ⚠️ 找不到收款碼圖片<br>
-                請直接使用帳號捐款
+            <div style="background: #f0f4f8; padding: 20px; border-radius: 12px; margin: 16px 0; border: 2px dashed #1e88e5;">
+                <div style="font-size: 12px; color: #7a8a95; margin-bottom: 8px;">AlipayHK 註冊電話號碼</div>
+                <div style="font-size: 22px; font-weight: bold; color: #1e88e5; letter-spacing: 1px;" id="alipay-account-display">
+                    +852 5372 6101
+                </div>
             </div>
 
-            <p style="font-size: 12px; color: #7a8a95; margin-bottom: 8px;">
-                📱 開啟 AlipayHK → 點「掃一掃」→ 掃描上方條碼<br>
-                💡 手機可長按圖片儲存，再用 App 從相冊識別
-            </p>
-
-            <div style="background: #f0f4f8; padding: 10px 16px; border-radius: 8px; margin-top: 12px;">
-                或轉帳至帳號：<br>
-                <strong style="color: #1e88e5;" id="alipay-account-display">your-alipayhk@example.com</strong>
+            <div style="background: #fff3e0; padding: 12px; border-radius: 8px; font-size: 12px; color: #e65100; line-height: 1.6; margin-bottom: 16px; text-align: left;">
+                💡 <strong>操作步驟：</strong><br>
+                1. 打開 AlipayHK App<br>
+                2. 點擊「轉帳」→「轉帳給朋友」<br>
+                3. 輸入上方電話號碼<br>
+                4. 輸入金額並確認付款
             </div>
 
-            <div class="modal-actions" style="margin-top: 20px;">
-                <button class="btn-submit" onclick="copyAlipayAccount()">📋 複製帳號</button>
+            <div class="modal-actions">
+                <button class="btn-submit" onclick="copyAlipayAccount()">📋 複製電話號碼</button>
                 <button class="btn-cancel" onclick="closeModal('alipay-modal')">關閉</button>
             </div>
         </div>
@@ -656,9 +648,9 @@
 
     <script>
         // ============================================================
-        // ⚠️ 請替換為你的真實資料
+        // ⚠️ 你的真實 AlipayHK 電話號碼
         // ============================================================
-        const ALIPAYHK_ACCOUNT = '852+53726101'; // 替換為你的 AlipayHK 帳號
+        const ALIPAYHK_ACCOUNT = '+852 5372 6101';
 
         // ============================================================
         // 評論系統
@@ -873,8 +865,8 @@
 
         function copyAlipayAccount() {
             navigator.clipboard.writeText(ALIPAYHK_ACCOUNT)
-                .then(() => showToast('✅ 帳號已複製'))
-                .catch(() => prompt('請手動複製帳號：', ALIPAYHK_ACCOUNT));
+                .then(() => showToast('✅ 電話號碼已複製！'))
+                .catch(() => prompt('請手動複製電話號碼：', ALIPAYHK_ACCOUNT));
         }
 
         // ============================================================
