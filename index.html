@@ -54,6 +54,28 @@
         #route-result .error { color: #d32f2f; background: #ffebee; padding: 8px; border-radius: 4px; font-size: 13px; }
         #route-result .warning { color: #e65100; background: #fff3e0; padding: 8px; border-radius: 4px; font-size: 13px; }
 
+        /* 新增：路線步驟清單樣式 */
+        .step-list {
+            margin-top: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #e1e6ea;
+            border-radius: 6px;
+            background: #fafbfc;
+        }
+        .step-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eef1f4;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+        }
+        .step-item:last-child { border-bottom: none; }
+        .step-icon { font-size: 16px; min-width: 24px; text-align: center; margin-top: 2px; }
+        .step-text { font-weight: bold; color: #2c3e50; }
+        .step-meta { color: #7a8a95; font-size: 12px; margin-top: 3px; }
+
         .map-label { background: rgba(255,255,255,0.95); border: 1px solid #c3ccd3; border-radius: 4px; color: #222; font-weight: bold; font-size: 12px; padding: 2px 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
         .map-label.is-accessible { border-color: #1a7f4b; background: #e8f5ee; color: #145a36; }
         .map-label::before { display: none; }
@@ -303,6 +325,30 @@
 
         let currentRouteLayer = null;
 
+        // 輔助函數：將 ORS 的 step type 轉換為直觀圖示
+        function getStepIcon(type) {
+            switch(type) {
+                case 1: return '🚶'; // 出發
+                case 2: return '➡️'; // 右轉
+                case 3: return '⬅️'; // 左轉
+                case 4: return '↗️'; // 微右
+                case 5: return '↖️'; // 微左
+                case 6: return '🏁'; // 抵達
+                case 7: return '🔄'; // 圓環
+                case 10: return '📍'; // 途經點
+                default: return '⬆️'; // 直行或其他
+            }
+        }
+
+        // 輔助函數：簡體轉繁體 (針對 ORS 回傳的中文)
+        function zhCNtoZHTW(text) {
+            return text
+                .replace(/右转/g, '右轉').replace(/左转/g, '左轉')
+                .replace(/直行/g, '直行').replace(/到达/g, '抵達')
+                .replace(/出发/g, '出發').replace(/米/g, '公尺')
+                .replace(/公里/g, '公里');
+        }
+
         document.getElementById('route-panel').addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultEl = document.getElementById('route-result');
@@ -326,7 +372,6 @@
             }
 
             try {
-                // ✅ 修正：將 'foot-wheelchair' 改為正確的 'wheelchair'
                 const response = await fetch('https://api.openrouteservice.org/v2/directions/wheelchair/geojson', {
                     method: 'POST',
                     headers: {
@@ -339,7 +384,8 @@
                             [end.lng, end.lat]
                         ],
                         preference: 'recommended',
-                        units: 'm'
+                        units: 'm',
+                        language: 'zh' // ✅ 新增：要求回傳中文指引
                     })
                 });
 
@@ -375,16 +421,36 @@
                 const distanceKm = (summary.distance / 1000).toFixed(2);
                 const durationMin = Math.round(summary.duration / 60);
 
+                // ✅ 新增：解析並生成詳細步驟清單
+                const steps = data.features[0].properties.segments[0].steps;
+                let stepsHtml = '<div class="step-list">';
+                steps.forEach((step) => {
+                    const icon = getStepIcon(step.type);
+                    const distText = step.distance >= 1000 
+                        ? (step.distance / 1000).toFixed(2) + ' 公里' 
+                        : Math.round(step.distance) + ' 公尺';
+                    const timeText = Math.round(step.duration / 60) + ' 分鐘';
+                    const instruction = zhCNtoZHTW(step.instruction);
+
+                    stepsHtml += `
+                        <div class="step-item">
+                            <span class="step-icon">${icon}</span>
+                            <div style="flex: 1;">
+                                <div class="step-text">${instruction}</div>
+                                <div class="step-meta">距離: ${distText} · 約 ${timeText}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                stepsHtml += '</div>';
+
                 resultEl.innerHTML = `
                     <div class="summary" style="color:#1a7f4b;">♿ 無障礙路線規劃成功</div>
-                    <div style="margin-top:8px; display:flex; gap:16px; font-weight:bold; color:#2c3e50;">
-                        <div>📏 距離：${distanceKm} 公里</div>
-                        <div>⏱️ 預計時間：${durationMin} 分鐘</div>
+                    <div style="margin-top:8px; display:flex; gap:16px; font-weight:bold; color:#2c3e50; font-size: 15px;">
+                        <div>📏 ${distanceKm} 公里</div>
+                        <div>⏱️ 約 ${durationMin} 分鐘</div>
                     </div>
-                    <div style="margin-top:8px; font-size:13px; color:#555; line-height:1.5;">
-                        <div>起點：${start.name}</div>
-                        <div>終點：${end.name}</div>
-                    </div>
+                    ${stepsHtml}
                 `;
 
             } catch (error) {
@@ -403,18 +469,14 @@
                 if (error.message.includes('401') || error.message.includes('403')) {
                     friendlyMsg = 'API 金鑰無效或已過期，請檢查 OpenRouteService 帳戶。';
                 } else if (error.message.includes('429')) {
-                    friendlyMsg = '請求過於頻繁，已達到免費版每日/每分鐘限制，請稍後再試。';
+                    friendlyMsg = '請求過於頻繁，已達到免費版限制，請稍後再試。';
                 } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
                     friendlyMsg = '網路連線失敗。請確認網路正常，或嘗試使用本地伺服器 (Live Server) 運行。';
                 }
 
                 resultEl.innerHTML = `
                     <div class="error">❌ 無法獲取無障礙路線：<br>${friendlyMsg}</div>
-                    <div class="warning" style="margin-top:8px;">⚠️ 已顯示兩點間的「直線距離」作為參考。請注意，直線不代表實際可行走的無障礙路徑。</div>
-                    <div style="margin-top:8px; font-size:13px; color:#555;">
-                        <div>起點：${start.name}</div>
-                        <div>終點：${end.name}</div>
-                    </div>
+                    <div class="warning" style="margin-top:8px;">⚠️ 已顯示兩點間的「直線距離」作為參考。</div>
                 `;
             } finally {
                 planBtn.disabled = false;
