@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#2c3e50">
     <title>關於我們 - 順利邨・觀塘無障礙地圖</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; height: 100%; }
@@ -92,13 +91,6 @@
         .action-btn .btn-icon { font-size: 28px; }
         .action-btn .btn-label { font-size: 13px; font-weight: bold; }
         .action-btn .btn-desc { font-size: 10px; color: #7a8a95; line-height: 1.3; }
-
-        .action-btn.primary {
-            background: linear-gradient(135deg, #1f6fa8, #185a8a);
-            color: #fff; border-color: transparent;
-        }
-        .action-btn.primary .btn-desc { color: rgba(255,255,255,0.85); }
-        .action-btn.primary:hover { background: linear-gradient(135deg, #185a8a, #0f4670); }
 
         .action-btn.donate {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
@@ -260,38 +252,6 @@
         .donate-option .d-desc { font-size: 11px; color: #7a8a95; margin-top: 2px; }
         .donate-option .d-arrow { color: #c3ccd3; font-size: 18px; }
 
-        /* AlipayHK QR Code 樣式 */
-        .qr-container {
-            display: inline-block;
-            padding: 20px;
-            background: #fff;
-            border: 3px solid #1e88e5;
-            border-radius: 16px;
-            margin: 16px 0;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .qr-container img {
-            display: block;
-        }
-        .qr-hint {
-            font-size: 12px;
-            color: #7a8a95;
-            margin-top: 8px;
-            line-height: 1.5;
-        }
-        .qr-account {
-            background: #f0f4f8;
-            padding: 10px 16px;
-            border-radius: 8px;
-            margin-top: 12px;
-            font-size: 13px;
-            color: #2c3e50;
-        }
-        .qr-account strong {
-            color: #1e88e5;
-            font-size: 14px;
-        }
-
         #bottom-nav {
             flex: 0 0 auto; display: flex; justify-content: space-around;
             background: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
@@ -332,15 +292,15 @@
 
         <div class="stats-row">
             <div class="stat-card">
-                <div class="num" id="stat-places">54</div>
+                <div class="num">54</div>
                 <div class="label">收錄地點</div>
             </div>
             <div class="stat-card">
-                <div class="num" id="stat-toilets">18</div>
+                <div class="num">18</div>
                 <div class="label">無障礙廁所</div>
             </div>
             <div class="stat-card">
-                <div class="num" id="stat-regions">2</div>
+                <div class="num">2</div>
                 <div class="label">覆蓋區域</div>
             </div>
         </div>
@@ -499,7 +459,6 @@
                     <li>新增「專屬路線偏好」功能</li>
                     <li>優化無障礙細節評估面板</li>
                     <li>新增評論與捐款功能</li>
-                    <li>新增 AlipayHK QR code 捐款</li>
                 </ul>
                 <div style="margin-top: 8px;"><strong>版本 1.1.0</strong> (2026-10-01)</div>
                 <ul style="margin: 6px 0; padding-left: 18px;">
@@ -622,23 +581,40 @@
         </div>
     </div>
 
-    <!-- AlipayHK QR Code 彈窗 -->
+    <!-- AlipayHK QR Code 彈窗（使用圖片） -->
     <div class="modal-overlay" id="alipay-modal">
         <div class="modal" style="text-align: center;">
             <h3 style="justify-content: center;">🔵 AlipayHK 捐款</h3>
             <p style="font-size: 13px; color: #555; margin-bottom: 8px;">
-                請使用 AlipayHK 掃描以下 QR code 進行捐款
+                用 AlipayHK App 掃描下方收款碼
             </p>
-            <div class="qr-container" id="alipay-qrcode"></div>
-            <p class="qr-hint">
-                💡 打開 AlipayHK → 點擊「掃碼」→ 掃描上方 QR code
-            </p>
-            <div class="qr-account">
-                或輸入帳號：<br>
-                <strong id="alipay-account-display">your-alipayhk@example.com</strong>
+
+            <img src="alipay-qr.png" 
+                 alt="AlipayHK 收款碼"
+                 style="width: 220px; height: 220px; object-fit: contain; 
+                        border: 3px solid #1e88e5; border-radius: 12px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                        margin: 16px 0;"
+                 onerror="this.style.display='none'; document.getElementById('qr-fallback').style.display='block';">
+
+            <div id="qr-fallback" style="display:none; padding: 20px; color: #d32f2f; font-size: 13px; line-height: 1.6;">
+                ⚠️ 找不到收款碼圖片<br>
+                請直接使用帳號捐款
             </div>
+
+            <p style="font-size: 12px; color: #7a8a95; margin-bottom: 8px;">
+                📱 開啟 AlipayHK → 點「掃一掃」→ 掃描上方條碼<br>
+                💡 手機可長按圖片儲存，再用 App 從相冊識別
+            </p>
+
+            <div style="background: #f0f4f8; padding: 10px 16px; border-radius: 8px; margin-top: 12px;">
+                或轉帳至帳號：<br>
+                <strong style="color: #1e88e5;" id="alipay-account-display">your-alipayhk@example.com</strong>
+            </div>
+
             <div class="modal-actions" style="margin-top: 20px;">
-                <button class="btn-cancel" onclick="closeModal('alipay-modal')" style="flex: 1;">關閉</button>
+                <button class="btn-submit" onclick="copyAlipayAccount()">📋 複製帳號</button>
+                <button class="btn-cancel" onclick="closeModal('alipay-modal')">關閉</button>
             </div>
         </div>
     </div>
@@ -680,10 +656,9 @@
 
     <script>
         // ============================================================
-        // ⚠️ 重要：請替換以下變數為你的真實資訊
+        // ⚠️ 請替換為你的真實資料
         // ============================================================
-        const ALIPAYHK_ACCOUNT = '+85259461204'; // 你的 AlipayHK 帳號（電郵或電話）
-        const ALIPAYHK_QR_DATA = '+85259461204'; // QR code 內容（可以是帳號、收款連結等）
+        const ALIPAYHK_ACCOUNT = '852+53726101'; // 替換為你的 AlipayHK 帳號
 
         // ============================================================
         // 評論系統
@@ -868,13 +843,14 @@
         }
 
         // ============================================================
-        // 捐款處理（含 AlipayHK QR Code）
+        // 捐款處理
         // ============================================================
         function handleDonate(method) {
             closeModal('donate-modal');
             switch(method) {
                 case 'alipayhk':
-                    openAlipayModal();
+                    document.getElementById('alipay-account-display').textContent = ALIPAYHK_ACCOUNT;
+                    openModal('alipay-modal');
                     break;
                 case 'paypal':
                     showToast('正在開啟 PayPal...');
@@ -895,31 +871,10 @@
             }
         }
 
-        // 開啟 AlipayHK QR Code 彈窗
-        function openAlipayModal() {
-            openModal('alipay-modal');
-            
-            // 更新顯示的帳號
-            document.getElementById('alipay-account-display').textContent = ALIPAYHK_ACCOUNT;
-            
-            // 清空舊的 QR code
-            const qrcodeContainer = document.getElementById('alipay-qrcode');
-            qrcodeContainer.innerHTML = '';
-            
-            // 生成新的 QR code
-            try {
-                new QRCode(qrcodeContainer, {
-                    text: ALIPAYHK_QR_DATA,
-                    width: 220,
-                    height: 220,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            } catch (err) {
-                console.error('QR Code 生成失敗:', err);
-                qrcodeContainer.innerHTML = '<div style="padding: 40px; color: #d32f2f;">QR Code 生成失敗<br>請直接使用帳號捐款</div>';
-            }
+        function copyAlipayAccount() {
+            navigator.clipboard.writeText(ALIPAYHK_ACCOUNT)
+                .then(() => showToast('✅ 帳號已複製'))
+                .catch(() => prompt('請手動複製帳號：', ALIPAYHK_ACCOUNT));
         }
 
         // ============================================================
