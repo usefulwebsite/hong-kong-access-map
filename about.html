@@ -2,37 +2,975 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>關於我們</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2c3e50">
+    <title>關於我們 - 順利邨・觀塘無障礙地圖</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
-        body { margin: 0; font-family: sans-serif; background: #f5f6fa; padding-bottom: 70px; }
-        #header { height: 50px; background: #2c3e50; color: white; line-height: 50px; text-align: center; font-weight: bold; font-size: 16px; }
-        .content { padding: 20px; max-width: 600px; margin: 20px auto; background: #fff; border-radius: 8px; line-height: 1.6; font-size: 14px; color: #333; }
-        
-        #bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 1000; }
-        #bottom-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #7f8c8d; font-size: 12px; }
-        #bottom-nav a.active { color: #3498db; font-weight: bold; }
-        #bottom-nav a span.icon { font-size: 22px; margin-bottom: 2px; }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; height: 100%; }
+        body {
+            font-family: -apple-system, "PingFang HK", "Microsoft JhengHei", sans-serif;
+            display: flex; flex-direction: column; height: 100dvh;
+            background: #f5f6fa; color: #333;
+        }
+        #header {
+            flex: 0 0 50px; background: #2c3e50; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 16px;
+        }
+
+        .content {
+            flex: 1 1 auto; overflow-y: auto;
+            padding: 16px; padding-bottom: 20px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #1f6fa8, #2c3e50);
+            color: #fff; border-radius: 16px;
+            padding: 24px 20px; margin-bottom: 16px;
+            text-align: center; position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: -50%; right: -20%;
+            width: 200px; height: 200px; border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+        .hero .logo { font-size: 48px; margin-bottom: 8px; }
+        .hero h1 { font-size: 20px; margin: 0 0 6px; }
+        .hero .tagline { font-size: 13px; opacity: 0.9; margin: 0 0 16px; line-height: 1.5; }
+        .hero .version {
+            display: inline-block; background: rgba(255,255,255,0.2);
+            padding: 4px 10px; border-radius: 12px; font-size: 11px;
+        }
+
+        .stats-row {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 8px; margin-bottom: 16px;
+        }
+        .stat-card {
+            background: #fff; border-radius: 12px;
+            padding: 14px 8px; text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .stat-card .num {
+            font-size: 22px; font-weight: bold; color: #1f6fa8;
+            margin-bottom: 2px;
+        }
+        .stat-card .label { font-size: 11px; color: #7a8a95; }
+
+        .section-card {
+            background: #fff; border-radius: 12px;
+            padding: 16px; margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .section-card h2 {
+            font-size: 15px; color: #2c3e50; margin: 0 0 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-card h2 .icon { font-size: 20px; }
+        .section-card p { font-size: 13px; line-height: 1.6; color: #555; margin: 0 0 8px; }
+        .section-card p:last-child { margin-bottom: 0; }
+
+        .action-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-bottom: 12px;
+        }
+        .action-btn {
+            background: #fff; border: 1px solid #e1e6ea;
+            border-radius: 12px; padding: 16px 12px;
+            text-align: center; cursor: pointer;
+            transition: all 0.2s; display: flex;
+            flex-direction: column; align-items: center; gap: 6px;
+            text-decoration: none; color: #2c3e50;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #1f6fa8;
+        }
+        .action-btn .btn-icon { font-size: 28px; }
+        .action-btn .btn-label { font-size: 13px; font-weight: bold; }
+        .action-btn .btn-desc { font-size: 10px; color: #7a8a95; line-height: 1.3; }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #1f6fa8, #185a8a);
+            color: #fff; border-color: transparent;
+        }
+        .action-btn.primary .btn-desc { color: rgba(255,255,255,0.85); }
+        .action-btn.primary:hover { background: linear-gradient(135deg, #185a8a, #0f4670); }
+
+        .action-btn.donate {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff; border-color: transparent;
+            grid-column: 1 / -1;
+        }
+        .action-btn.donate .btn-desc { color: rgba(255,255,255,0.85); }
+        .action-btn.donate:hover { background: linear-gradient(135deg, #c0392b, #922b21); }
+
+        .action-btn.volunteer {
+            background: linear-gradient(135deg, #27ae60, #1e8449);
+            color: #fff; border-color: transparent;
+            grid-column: 1 / -1;
+        }
+        .action-btn.volunteer .btn-desc { color: rgba(255,255,255,0.85); }
+
+        .review-summary {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; background: #f0f4f8; border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        .review-score {
+            font-size: 32px; font-weight: bold; color: #f39c12;
+            line-height: 1;
+        }
+        .review-stars { color: #f39c12; font-size: 16px; letter-spacing: 2px; }
+        .review-count { font-size: 11px; color: #7a8a95; margin-top: 2px; }
+
+        .star-input {
+            display: flex; gap: 4px; margin-bottom: 10px;
+            justify-content: center; direction: rtl;
+        }
+        .star-input span {
+            font-size: 28px; cursor: pointer;
+            color: #c3ccd3; transition: color 0.15s;
+        }
+        .star-input span:hover,
+        .star-input span:hover ~ span { color: #f39c12; }
+        .star-input span.active { color: #f39c12; }
+
+        .review-form textarea {
+            width: 100%; padding: 10px; border: 1px solid #c3ccd3;
+            border-radius: 8px; font-size: 13px; resize: vertical;
+            min-height: 80px; margin-bottom: 10px; font-family: inherit;
+        }
+        .review-form textarea:focus {
+            outline: 3px solid #1f6fa8; outline-offset: 1px;
+        }
+        .review-form button {
+            width: 100%; padding: 10px; background: #1f6fa8;
+            color: #fff; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: bold; cursor: pointer;
+        }
+        .review-form button:hover { background: #185a8a; }
+
+        .review-list { margin-top: 16px; }
+        .review-item {
+            padding: 12px; background: #fafbfc;
+            border-radius: 8px; margin-bottom: 8px;
+            border-left: 3px solid #f39c12;
+        }
+        .review-item .review-head {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 6px;
+        }
+        .review-item .review-author { font-size: 12px; font-weight: bold; color: #2c3e50; }
+        .review-item .review-date { font-size: 10px; color: #7a8a95; }
+        .review-item .review-stars { font-size: 13px; }
+        .review-item .review-text { font-size: 13px; color: #444; line-height: 1.5; }
+
+        .source-list {
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .source-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 10px; background: #fafbfc;
+            border-radius: 6px; font-size: 12px;
+        }
+        .source-item .src-icon { font-size: 16px; }
+        .source-item .src-name { font-weight: bold; color: #2c3e50; }
+        .source-item .src-desc { font-size: 11px; color: #7a8a95; }
+
+        .a11y-statement {
+            background: #e8f5ee; border-left: 4px solid #1a7f4b;
+            padding: 12px; border-radius: 6px; font-size: 12px;
+            line-height: 1.6; color: #145a36;
+        }
+
+        .social-row {
+            display: flex; gap: 8px; flex-wrap: wrap;
+        }
+        .social-btn {
+            flex: 1; min-width: 80px;
+            padding: 10px; background: #f0f4f8;
+            border-radius: 8px; text-align: center;
+            text-decoration: none; color: #2c3e50;
+            font-size: 12px; font-weight: bold;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            transition: background 0.15s;
+        }
+        .social-btn:hover { background: #e1e6ea; }
+        .social-btn .s-icon { font-size: 22px; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: #fff; border-radius: 12px;
+            padding: 20px; max-width: 400px; width: 100%;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal h3 {
+            margin: 0 0 12px; color: #2c3e50; font-size: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .modal label {
+            display: block; font-size: 13px; font-weight: bold;
+            color: #2c3e50; margin-bottom: 4px; margin-top: 10px;
+        }
+        .modal input, .modal textarea, .modal select {
+            width: 100%; padding: 10px; border: 1px solid #c3ccd3;
+            border-radius: 6px; font-size: 13px; font-family: inherit;
+        }
+        .modal textarea { resize: vertical; min-height: 80px; }
+        .modal input:focus, .modal textarea:focus, .modal select:focus {
+            outline: 3px solid #1f6fa8; outline-offset: 1px;
+        }
+        .modal-actions {
+            display: flex; gap: 8px; margin-top: 16px;
+        }
+        .modal-actions button {
+            flex: 1; padding: 10px; border-radius: 6px;
+            font-size: 14px; font-weight: bold; cursor: pointer;
+            border: none;
+        }
+        .btn-cancel { background: #eef1f4; color: #5a6b73; }
+        .btn-submit { background: #1f6fa8; color: #fff; }
+        .btn-submit:hover { background: #185a8a; }
+
+        .donate-options {
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .donate-option {
+            padding: 14px; border: 2px solid #e1e6ea;
+            border-radius: 10px; cursor: pointer;
+            transition: all 0.2s; display: flex;
+            align-items: center; gap: 12px;
+        }
+        .donate-option:hover {
+            border-color: #e74c3c; background: #fff5f5;
+        }
+        .donate-option .d-icon { font-size: 28px; }
+        .donate-option .d-info { flex: 1; }
+        .donate-option .d-name { font-weight: bold; color: #2c3e50; font-size: 14px; }
+        .donate-option .d-desc { font-size: 11px; color: #7a8a95; margin-top: 2px; }
+        .donate-option .d-arrow { color: #c3ccd3; font-size: 18px; }
+
+        /* AlipayHK QR Code 樣式 */
+        .qr-container {
+            display: inline-block;
+            padding: 20px;
+            background: #fff;
+            border: 3px solid #1e88e5;
+            border-radius: 16px;
+            margin: 16px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .qr-container img {
+            display: block;
+        }
+        .qr-hint {
+            font-size: 12px;
+            color: #7a8a95;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        .qr-account {
+            background: #f0f4f8;
+            padding: 10px 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+            font-size: 13px;
+            color: #2c3e50;
+        }
+        .qr-account strong {
+            color: #1e88e5;
+            font-size: 14px;
+        }
+
+        #bottom-nav {
+            flex: 0 0 auto; display: flex; justify-content: space-around;
+            background: #fff; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000; padding-bottom: env(safe-area-inset-bottom);
+        }
+        #bottom-nav a {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 2px;
+            min-height: 60px; text-decoration: none;
+            color: #5a6b73; font-size: 12px;
+        }
+        #bottom-nav a.active { color: #1f6fa8; font-weight: bold; }
+        #bottom-nav a .icon { font-size: 22px; }
+
+        .toast {
+            position: fixed; bottom: 80px; left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50; color: #fff;
+            padding: 10px 20px; border-radius: 20px;
+            font-size: 13px; z-index: 3000;
+            opacity: 0; transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
-    <div id="header">關於本專案</div>
+
+    <header id="header">ℹ️ 關於我們</header>
+
     <div class="content">
-        <p><b>順利邨無障礙地圖</b> 是一個專為輪椅使用者、長者及行動不便人士設計的資訊平台。</p>
-        <p>我們透過實地考察，將順利邨附近的設施進行了標註。</p>
-        <p>地圖上的圖示含義：</p>
-        <ul>
-            <li>✅ <b>良好</b>：輪椅可安全通過。</li>
-            <li>⚠️ <b>有障礙</b>：有斜道但存在缺陷，需小心或繞行。</li>
-            <li>❌ <b>不可達</b>：有梯級阻礙，輪椅完全不可達。</li>
-        </ul>
-        <p>希望這個工具能幫助大家更方便地出行！</p>
+        <div class="hero">
+            <div class="logo">♿</div>
+            <h1>順利邨・觀塘無障礙地圖</h1>
+            <p class="tagline">為輪椅使用者打造的專屬出行助手<br>讓每一次出門都更安心、更順暢</p>
+            <span class="version">版本 1.2.0 · 2026 年 11 月</span>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="num" id="stat-places">54</div>
+                <div class="label">收錄地點</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="stat-toilets">18</div>
+                <div class="label">無障礙廁所</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="stat-regions">2</div>
+                <div class="label">覆蓋區域</div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2><span class="icon">🤝</span>參與我們</h2>
+            <p style="margin-bottom: 12px;">你的每一份參與，都能讓無障礙環境變得更好。</p>
+            <div class="action-grid">
+                <button class="action-btn" onclick="openReportModal()">
+                    <span class="btn-icon">🚧</span>
+                    <span class="btn-label">回報問題</span>
+                    <span class="btn-desc">資料錯誤/功能建議</span>
+                </button>
+                <button class="action-btn" onclick="scrollToReview()">
+                    <span class="btn-icon">💬</span>
+                    <span class="btn-label">評論反饋</span>
+                    <span class="btn-desc">分享你的使用體驗</span>
+                </button>
+                <button class="action-btn" onclick="shareApp()">
+                    <span class="btn-icon">📤</span>
+                    <span class="btn-label">分享應用</span>
+                    <span class="btn-desc">推薦給需要的人</span>
+                </button>
+                <button class="action-btn" onclick="openContactModal()">
+                    <span class="btn-icon">✉️</span>
+                    <span class="btn-label">聯絡我們</span>
+                    <span class="btn-desc">合作/查詢</span>
+                </button>
+                <button class="action-btn donate" onclick="openDonateModal()">
+                    <span class="btn-icon">❤️</span>
+                    <span class="btn-label">捐款支持</span>
+                    <span class="btn-desc">您的捐款將用於維護地圖、擴充更多地區資料</span>
+                </button>
+                <button class="action-btn volunteer" onclick="openVolunteerModal()">
+                    <span class="btn-icon">🙋</span>
+                    <span class="btn-label">成為志願者</span>
+                    <span class="btn-desc">協助實地考察、更新設施資料、翻譯內容</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2><span class="icon">📖</span>關於專案</h2>
+            <p>本專案是一個<strong>非牟利</strong>的社區驅動計畫，致力於為輪椅使用者、長者、推嬰兒車的父母，以及任何需要無障礙設施的人士，提供準確、即時的無障礙地圖資訊。</p>
+            <p>我們相信，<strong>無障礙不是特權，而是基本權利</strong>。每一個人都應該能夠自由、安全地出行，而不必擔心斜道太陡、門太窄、或升降機故障。</p>
+            <p>目前我們專注於<strong>順利邨</strong>和<strong>觀塘</strong>地區，未來計劃擴展至全港十八區。</p>
+        </div>
+
+        <div class="section-card" id="review-section">
+            <h2><span class="icon">⭐</span>使用者評論</h2>
+            <div class="review-summary">
+                <div>
+                    <div class="review-score" id="avg-score">4.8</div>
+                </div>
+                <div>
+                    <div class="review-stars" id="avg-stars">★★★★★</div>
+                    <div class="review-count"><span id="review-count">0</span> 則評論</div>
+                </div>
+            </div>
+
+            <div class="review-form">
+                <label style="font-size: 13px; font-weight: bold; color: #2c3e50; margin-bottom: 6px; display: block;">寫下你的評論</label>
+                <div class="star-input" id="star-input">
+                    <span data-value="5">★</span>
+                    <span data-value="4">★</span>
+                    <span data-value="3">★</span>
+                    <span data-value="2">★</span>
+                    <span data-value="1">★</span>
+                </div>
+                <textarea id="review-text" placeholder="分享你的使用體驗、建議或鼓勵..."></textarea>
+                <button onclick="submitReview()">送出評論</button>
+            </div>
+
+            <div class="review-list" id="review-list"></div>
+        </div>
+
+        <div class="section-card">
+            <h2><span class="icon">📚</span>資料來源</h2>
+            <p style="margin-bottom: 10px;">我們的資料來自以下可靠來源，並經志願者實地驗證：</p>
+            <div class="source-list">
+                <div class="source-item">
+                    <span class="src-icon">🗺️</span>
+                    <div>
+                        <div class="src-name">香港地政總署</div>
+                        <div class="src-desc">地圖底圖與地理資訊</div>
+                    </div>
+                </div>
+                <div class="source-item">
+                    <span class="src-icon">🏢</span>
+                    <div>
+                        <div class="src-name">勞工及福利局</div>
+                        <div class="src-desc">暢通易達設施官方資料</div>
+                    </div>
+                </div>
+                <div class="source-item">
+                    <span class="src-icon">🚇</span>
+                    <div>
+                        <div class="src-name">港鐵公司</div>
+                        <div class="src-desc">車站無障礙設施資訊</div>
+                    </div>
+                </div>
+                <div class="source-item">
+                    <span class="src-icon">👥</span>
+                    <div>
+                        <div class="src-name">社區志願者</div>
+                        <div class="src-desc">實地考察與使用者回報</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2><span class="icon">♿</span>無障礙聲明</h2>
+            <div class="a11y-statement">
+                <strong>我們致力於打造無障礙的數位體驗：</strong>
+                <ul style="margin: 8px 0 0; padding-left: 18px;">
+                    <li>支援螢幕閱讀器（Screen Reader）</li>
+                    <li>所有互動元素可透過鍵盤操作</li>
+                    <li>足夠的顏色對比度（符合 WCAG 2.1 AA 標準）</li>
+                    <li>可調整的文字大小</li>
+                    <li>語意化 HTML 結構</li>
+                </ul>
+                <p style="margin-top: 8px;">如果你在使用過程中遇到任何無障礙問題，請<a href="#" onclick="openReportModal(); return false;" style="color:#145a36; font-weight:bold;">回報給我們</a>。</p>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2><span class="icon">🌐</span>關注我們</h2>
+            <p style="margin-bottom: 10px;">追蹤最新更新、參與討論：</p>
+            <div class="social-row">
+                <a href="#" class="social-btn" onclick="showToast('即將推出'); return false;">
+                    <span class="s-icon">📘</span>
+                    <span>Facebook</span>
+                </a>
+                <a href="#" class="social-btn" onclick="showToast('即將推出'); return false;">
+                    <span class="s-icon">📷</span>
+                    <span>Instagram</span>
+                </a>
+                <a href="#" class="social-btn" onclick="showToast('即將推出'); return false;">
+                    <span class="s-icon">💬</span>
+                    <span>WhatsApp</span>
+                </a>
+                <a href="mailto:hello@a11y-map.hk" class="social-btn">
+                    <span class="s-icon">✉️</span>
+                    <span>Email</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2><span class="icon">📋</span>版本資訊</h2>
+            <div style="font-size: 12px; color: #555; line-height: 1.7;">
+                <div><strong>版本 1.2.0</strong> (2026-11-18)</div>
+                <ul style="margin: 6px 0; padding-left: 18px;">
+                    <li>新增 18 個無障礙廁所地點</li>
+                    <li>新增「專屬路線偏好」功能</li>
+                    <li>優化無障礙細節評估面板</li>
+                    <li>新增評論與捐款功能</li>
+                    <li>新增 AlipayHK QR code 捐款</li>
+                </ul>
+                <div style="margin-top: 8px;"><strong>版本 1.1.0</strong> (2026-10-01)</div>
+                <ul style="margin: 6px 0; padding-left: 18px;">
+                    <li>新增列表頁與緊急快速鍵</li>
+                    <li>新增收藏與回報功能</li>
+                </ul>
+                <div style="margin-top: 8px;"><strong>版本 1.0.0</strong> (2026-08-15)</div>
+                <ul style="margin: 6px 0 0; padding-left: 18px;">
+                    <li>首次發布，涵蓋順利邨與觀塘地區</li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 16px; font-size: 11px; color: #7a8a95; line-height: 1.6;">
+            © 2026 順利邨・觀塘無障礙地圖<br>
+            以 ❤️ 打造，為無障礙世界而努力<br>
+            <span style="font-size: 10px;">本專案為非牟利性質，資料僅供參考</span>
+        </div>
     </div>
 
-    <div id="bottom-nav">
+    <!-- 回報問題彈窗 -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal">
+            <h3>🚧 回報問題</h3>
+            <label>問題類型</label>
+            <select id="report-type">
+                <option value="data-error">📍 資料錯誤</option>
+                <option value="feature-suggest">💡 功能建議</option>
+                <option value="bug">🐛 系統錯誤</option>
+                <option value="new-place">🆕 新增地點</option>
+                <option value="other">⚠️ 其他</option>
+            </select>
+            <label>你的電郵（選填）</label>
+            <input type="email" id="report-email" placeholder="example@email.com">
+            <label>詳細說明</label>
+            <textarea id="report-desc" placeholder="請詳細描述問題或建議..."></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('report-modal')">取消</button>
+                <button class="btn-submit" onclick="submitReport()">送出回報</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 聯絡我們彈窗 -->
+    <div class="modal-overlay" id="contact-modal">
+        <div class="modal">
+            <h3>✉️ 聯絡我們</h3>
+            <label>主旨</label>
+            <select id="contact-subject">
+                <option value="collaboration">🤝 合作提案</option>
+                <option value="sponsorship">💼 贊助查詢</option>
+                <option value="media">📰 媒體採訪</option>
+                <option value="other">💬 其他查詢</option>
+            </select>
+            <label>你的姓名</label>
+            <input type="text" id="contact-name" placeholder="你的姓名">
+            <label>你的電郵</label>
+            <input type="email" id="contact-email" placeholder="example@email.com" required>
+            <label>訊息內容</label>
+            <textarea id="contact-message" placeholder="請說明你的需求..."></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('contact-modal')">取消</button>
+                <button class="btn-submit" onclick="submitContact()">送出訊息</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 捐款彈窗 -->
+    <div class="modal-overlay" id="donate-modal">
+        <div class="modal">
+            <h3>❤️ 捐款支持</h3>
+            <p style="font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 14px;">
+                你的捐款將用於：伺服器維護、資料更新、擴展至更多地區、以及志願者培訓。每一份捐款都會讓無障礙地圖更完善。
+            </p>
+            <div class="donate-options">
+                <div class="donate-option" onclick="handleDonate('alipayhk')">
+                    <span class="d-icon">🔵</span>
+                    <div class="d-info">
+                        <div class="d-name">AlipayHK 支付寶香港</div>
+                        <div class="d-desc">掃描 QR code 快速捐款</div>
+                    </div>
+                    <span class="d-arrow">›</span>
+                </div>
+                <div class="donate-option" onclick="handleDonate('paypal')">
+                    <span class="d-icon">💳</span>
+                    <div class="d-info">
+                        <div class="d-name">PayPal</div>
+                        <div class="d-desc">國際通用，支援信用卡</div>
+                    </div>
+                    <span class="d-arrow">›</span>
+                </div>
+                <div class="donate-option" onclick="handleDonate('fps')">
+                    <span class="d-icon">📱</span>
+                    <div class="d-info">
+                        <div class="d-name">轉數快 (FPS)</div>
+                        <div class="d-desc">香港本地銀行轉帳</div>
+                    </div>
+                    <span class="d-arrow">›</span>
+                </div>
+                <div class="donate-option" onclick="handleDonate('payme')">
+                    <span class="d-icon">💰</span>
+                    <div class="d-info">
+                        <div class="d-name">PayMe</div>
+                        <div class="d-desc">快速簡便的本地捐款</div>
+                    </div>
+                    <span class="d-arrow">›</span>
+                </div>
+                <div class="donate-option" onclick="handleDonate('bank')">
+                    <span class="d-icon">🏦</span>
+                    <div class="d-info">
+                        <div class="d-name">銀行轉帳</div>
+                        <div class="d-desc">適合大額捐款</div>
+                    </div>
+                    <span class="d-arrow">›</span>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('donate-modal')" style="flex: 1;">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AlipayHK QR Code 彈窗 -->
+    <div class="modal-overlay" id="alipay-modal">
+        <div class="modal" style="text-align: center;">
+            <h3 style="justify-content: center;">🔵 AlipayHK 捐款</h3>
+            <p style="font-size: 13px; color: #555; margin-bottom: 8px;">
+                請使用 AlipayHK 掃描以下 QR code 進行捐款
+            </p>
+            <div class="qr-container" id="alipay-qrcode"></div>
+            <p class="qr-hint">
+                💡 打開 AlipayHK → 點擊「掃碼」→ 掃描上方 QR code
+            </p>
+            <div class="qr-account">
+                或輸入帳號：<br>
+                <strong id="alipay-account-display">your-alipayhk@example.com</strong>
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn-cancel" onclick="closeModal('alipay-modal')" style="flex: 1;">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 志願者彈窗 -->
+    <div class="modal-overlay" id="volunteer-modal">
+        <div class="modal">
+            <h3>🙋 成為志願者</h3>
+            <p style="font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 14px;">
+                加入我們的志願者團隊，一起打造更完善的無障礙地圖！你可以：
+            </p>
+            <ul style="font-size: 13px; color: #555; line-height: 1.7; padding-left: 18px; margin-bottom: 14px;">
+                <li>📍 實地考察並更新設施資料</li>
+                <li>📸 拍攝設施照片</li>
+                <li>💻 協助程式開發或設計</li>
+                <li>🌐 翻譯內容（英語/普通話）</li>
+                <li>📣 協助推廣與社群營運</li>
+            </ul>
+            <label>你的姓名</label>
+            <input type="text" id="vol-name" placeholder="你的姓名">
+            <label>聯絡方式（電郵/電話/WhatsApp）</label>
+            <input type="text" id="vol-contact" placeholder="如何聯絡你">
+            <label>感興趣的範疇</label>
+            <textarea id="vol-interest" placeholder="你想參與哪些工作？"></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('volunteer-modal')">取消</button>
+                <button class="btn-submit" onclick="submitVolunteer()">加入團隊</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <nav id="bottom-nav">
         <a href="index.html"><span class="icon">🗺️</span><span>地圖</span></a>
         <a href="list.html"><span class="icon">📋</span><span>列表</span></a>
         <a href="about.html" class="active"><span class="icon">ℹ️</span><span>關於</span></a>
-    </div>
+    </nav>
+
+    <script>
+        // ============================================================
+        // ⚠️ 重要：請替換以下變數為你的真實資訊
+        // ============================================================
+        const ALIPAYHK_ACCOUNT = '+85259461204'; // 你的 AlipayHK 帳號（電郵或電話）
+        const ALIPAYHK_QR_DATA = '+85259461204'; // QR code 內容（可以是帳號、收款連結等）
+
+        // ============================================================
+        // 評論系統
+        // ============================================================
+        let currentRating = 0;
+        const reviews = JSON.parse(localStorage.getItem('a11y_reviews') || '[]');
+
+        document.querySelectorAll('#star-input span').forEach(star => {
+            star.addEventListener('click', () => {
+                currentRating = parseInt(star.dataset.value);
+                updateStarDisplay();
+            });
+        });
+
+        function updateStarDisplay() {
+            document.querySelectorAll('#star-input span').forEach(star => {
+                const val = parseInt(star.dataset.value);
+                star.classList.toggle('active', val <= currentRating);
+            });
+        }
+
+        function submitReview() {
+            const text = document.getElementById('review-text').value.trim();
+            if (currentRating === 0) {
+                showToast('請先選擇評分');
+                return;
+            }
+            if (!text) {
+                showToast('請填寫評論內容');
+                return;
+            }
+
+            reviews.unshift({
+                rating: currentRating,
+                text: text,
+                author: '匿名使用者',
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('a11y_reviews', JSON.stringify(reviews));
+
+            document.getElementById('review-text').value = '';
+            currentRating = 0;
+            updateStarDisplay();
+            renderReviews();
+            showToast('✅ 感謝你的評論！');
+        }
+
+        function renderReviews() {
+            const listEl = document.getElementById('review-list');
+            const countEl = document.getElementById('review-count');
+            const avgEl = document.getElementById('avg-score');
+            const starsEl = document.getElementById('avg-stars');
+
+            countEl.textContent = reviews.length;
+
+            if (reviews.length > 0) {
+                const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+                avgEl.textContent = avg.toFixed(1);
+                const fullStars = Math.round(avg);
+                starsEl.textContent = '★'.repeat(fullStars) + '☆'.repeat(5 - fullStars);
+            }
+
+            if (reviews.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#7a8a95; font-size:13px;">還沒有評論，成為第一個評論的人！</div>';
+                return;
+            }
+
+            listEl.innerHTML = reviews.slice(0, 10).map(r => {
+                const date = new Date(r.date);
+                const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                return `
+                    <div class="review-item">
+                        <div class="review-head">
+                            <span class="review-author">${r.author}</span>
+                            <span class="review-date">${dateStr}</span>
+                        </div>
+                        <div class="review-stars">${stars}</div>
+                        <div class="review-text">${escapeHtml(r.text)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function scrollToReview() {
+            document.getElementById('review-section').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => document.getElementById('review-text').focus(), 500);
+        }
+
+        // ============================================================
+        // 彈窗控制
+        // ============================================================
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+        function openReportModal() { openModal('report-modal'); }
+        function openContactModal() { openModal('contact-modal'); }
+        function openDonateModal() { openModal('donate-modal'); }
+        function openVolunteerModal() { openModal('volunteer-modal'); }
+
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.classList.remove('show');
+            });
+        });
+
+        // ============================================================
+        // 表單提交
+        // ============================================================
+        function submitReport() {
+            const type = document.getElementById('report-type').value;
+            const email = document.getElementById('report-email').value.trim();
+            const desc = document.getElementById('report-desc').value.trim();
+
+            if (!desc) {
+                showToast('請填寫詳細說明');
+                return;
+            }
+
+            const reports = JSON.parse(localStorage.getItem('a11y_project_reports') || '[]');
+            reports.push({
+                type, email, desc,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('a11y_project_reports', JSON.stringify(reports));
+
+            document.getElementById('report-email').value = '';
+            document.getElementById('report-desc').value = '';
+            closeModal('report-modal');
+            showToast('✅ 感謝你的回報！我們會盡快處理。');
+        }
+
+        function submitContact() {
+            const subject = document.getElementById('contact-subject').value;
+            const name = document.getElementById('contact-name').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+            const message = document.getElementById('contact-message').value.trim();
+
+            if (!email || !message) {
+                showToast('請填寫電郵和訊息內容');
+                return;
+            }
+
+            const mailto = `mailto:hello@a11y-map.hk?subject=${encodeURIComponent('[' + subject + '] ' + (name || '匿名'))}&body=${encodeURIComponent(message + '\n\n---\n來自: ' + name + ' <' + email + '>')}`;
+            window.location.href = mailto;
+
+            closeModal('contact-modal');
+            showToast('✅ 已開啟郵件應用程式');
+        }
+
+        function submitVolunteer() {
+            const name = document.getElementById('vol-name').value.trim();
+            const contact = document.getElementById('vol-contact').value.trim();
+            const interest = document.getElementById('vol-interest').value.trim();
+
+            if (!name || !contact) {
+                showToast('請填寫姓名和聯絡方式');
+                return;
+            }
+
+            const volunteers = JSON.parse(localStorage.getItem('a11y_volunteers') || '[]');
+            volunteers.push({
+                name, contact, interest,
+                timestamp: new Date().toISOString()
+            });
+            localStorage.setItem('a11y_volunteers', JSON.stringify(volunteers));
+
+            document.getElementById('vol-name').value = '';
+            document.getElementById('vol-contact').value = '';
+            document.getElementById('vol-interest').value = '';
+            closeModal('volunteer-modal');
+            showToast('✅ 歡迎加入！我們會盡快與你聯絡。');
+        }
+
+        // ============================================================
+        // 捐款處理（含 AlipayHK QR Code）
+        // ============================================================
+        function handleDonate(method) {
+            closeModal('donate-modal');
+            switch(method) {
+                case 'alipayhk':
+                    openAlipayModal();
+                    break;
+                case 'paypal':
+                    showToast('正在開啟 PayPal...');
+                    setTimeout(() => {
+                        // window.open('https://www.paypal.com/donate?hosted_button_id=XXX', '_blank');
+                        showToast('💡 請替換為真實的 PayPal 連結');
+                    }, 800);
+                    break;
+                case 'fps':
+                    showToast('📱 轉數快號碼：+852 XXXX XXXX');
+                    break;
+                case 'payme':
+                    showToast('💰 PayMe：+852 XXXX XXXX');
+                    break;
+                case 'bank':
+                    showToast('🏦 銀行資訊已發送至你的電郵');
+                    break;
+            }
+        }
+
+        // 開啟 AlipayHK QR Code 彈窗
+        function openAlipayModal() {
+            openModal('alipay-modal');
+            
+            // 更新顯示的帳號
+            document.getElementById('alipay-account-display').textContent = ALIPAYHK_ACCOUNT;
+            
+            // 清空舊的 QR code
+            const qrcodeContainer = document.getElementById('alipay-qrcode');
+            qrcodeContainer.innerHTML = '';
+            
+            // 生成新的 QR code
+            try {
+                new QRCode(qrcodeContainer, {
+                    text: ALIPAYHK_QR_DATA,
+                    width: 220,
+                    height: 220,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (err) {
+                console.error('QR Code 生成失敗:', err);
+                qrcodeContainer.innerHTML = '<div style="padding: 40px; color: #d32f2f;">QR Code 生成失敗<br>請直接使用帳號捐款</div>';
+            }
+        }
+
+        // ============================================================
+        // 分享功能
+        // ============================================================
+        async function shareApp() {
+            const shareData = {
+                title: '順利邨・觀塘無障礙地圖',
+                text: '為輪椅使用者打造的專屬出行助手，收錄 54 個無障礙地點！',
+                url: window.location.origin + '/index.html'
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                    showToast('✅ 分享成功！');
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        fallbackCopy();
+                    }
+                }
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        function fallbackCopy() {
+            const url = window.location.origin + '/index.html';
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('✅ 連結已複製到剪貼簿！');
+            }).catch(() => {
+                prompt('複製以下連結分享：', url);
+            });
+        }
+
+        // ============================================================
+        // Toast 提示
+        // ============================================================
+        let toastTimer = null;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // ============================================================
+        // 初始化
+        // ============================================================
+        renderReviews();
+    </script>
 </body>
 </html>
