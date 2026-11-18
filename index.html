@@ -45,6 +45,17 @@
         .suggestions li.item:hover, .suggestions li.item.active { background: #eaf2f9; border-left-color: #1f6fa8; }
         .suggestions .region-tag { font-size: 11px; color: #7a8a95; margin-left: 8px; padding: 1px 6px; background: #eef1f4; border-radius: 10px; }
         
+        /* 新增：路線偏好區塊樣式 */
+        .pref-box {
+            margin-top: 4px; padding: 12px; background: #f0f4f8; border-radius: 8px;
+            font-size: 13px; color: #2c3e50; border: 1px solid #dce4eb;
+        }
+        .pref-box .pref-title { font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .pref-box label { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; cursor: pointer; font-weight: normal; }
+        .pref-box label:last-child { margin-bottom: 0; }
+        .pref-box input[type="checkbox"] { accent-color: #1f6fa8; width: 16px; height: 16px; }
+        .pref-box .hint { font-size: 11px; color: #7a8a95; margin-top: 6px; line-height: 1.4; }
+        
         #plan-btn { width: 100%; min-height: 48px; padding: 12px; background: #1f6fa8; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 4px; transition: background 0.2s; }
         #plan-btn:hover { background: #185a8a; }
         #plan-btn:disabled { background: #7a8a95; cursor: not-allowed; opacity: 0.7; }
@@ -54,30 +65,24 @@
         #route-result .error { color: #d32f2f; background: #ffebee; padding: 8px; border-radius: 4px; font-size: 13px; }
         #route-result .warning { color: #e65100; background: #fff3e0; padding: 8px; border-radius: 4px; font-size: 13px; }
 
-        /* 新增：路線步驟清單樣式 */
         .step-list {
-            margin-top: 12px;
-            max-height: 250px;
-            overflow-y: auto;
-            border: 1px solid #e1e6ea;
-            border-radius: 6px;
-            background: #fafbfc;
+            margin-top: 12px; max-height: 250px; overflow-y: auto;
+            border: 1px solid #e1e6ea; border-radius: 6px; background: #fafbfc;
         }
         .step-item {
-            padding: 10px 12px;
-            border-bottom: 1px solid #eef1f4;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            font-size: 13px;
+            padding: 10px 12px; border-bottom: 1px solid #eef1f4;
+            display: flex; align-items: flex-start; gap: 10px; font-size: 13px;
         }
         .step-item:last-child { border-bottom: none; }
+        .step-item.is-warning { background: #fff8e1; }
         .step-icon { font-size: 16px; min-width: 24px; text-align: center; margin-top: 2px; }
         .step-text { font-weight: bold; color: #2c3e50; }
         .step-meta { color: #7a8a95; font-size: 12px; margin-top: 3px; }
+        .step-access-tip { color: #1a7f4b; font-size: 12px; margin-top: 4px; font-weight: bold; }
 
         .map-label { background: rgba(255,255,255,0.95); border: 1px solid #c3ccd3; border-radius: 4px; color: #222; font-weight: bold; font-size: 12px; padding: 2px 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
         .map-label.is-accessible { border-color: #1a7f4b; background: #e8f5ee; color: #145a36; }
+        .map-label.is-steep { border-color: #d32f2f; background: #ffebee; color: #b71c1c; }
         .map-label::before { display: none; }
 
         #search-toggle-btn {
@@ -102,6 +107,17 @@
         #bottom-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 60px; text-decoration: none; color: #5a6b73; font-size: 12px; }
         #bottom-nav a.active { color: #1f6fa8; font-weight: bold; }
         #bottom-nav a .icon { font-size: 22px; }
+
+        /* Popup 內無障礙細節樣式 */
+        .acc-panel { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #c3ccd3; }
+        .acc-title { font-weight: bold; color: #1f6fa8; margin-bottom: 6px; font-size: 13px; }
+        .acc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 12px; color: #444; }
+        .acc-grid b { color: #2c3e50; }
+        .acc-grid .bad { color: #d32f2f; font-weight: bold; }
+        .acc-grid .good { color: #1a7f4b; font-weight: bold; }
+        .acc-alert { margin-top: 6px; font-size: 12px; font-weight: bold; }
+        .acc-alert.warn { color: #d32f2f; }
+        .acc-alert.info { color: #1a7f4b; }
     </style>
 </head>
 <body>
@@ -130,6 +146,21 @@
                 <input type="text" id="end-input" placeholder="輸入「順利邨」「觀塘」「洗手間」" role="combobox" aria-expanded="false">
                 <ul id="end-suggestions" class="suggestions" hidden></ul>
             </div>
+
+            <!-- 新增：輪椅專屬路線偏好 -->
+            <div class="pref-box">
+                <div class="pref-title">♿ 專屬路線偏好</div>
+                <label>
+                    <input type="checkbox" id="prefer-covered">
+                    <span>☂️ 優先規劃有上蓋路線 (避雨/防曬)</span>
+                </label>
+                <label>
+                    <input type="checkbox" id="avoid-steep" checked>
+                    <span>⚠️ 嚴格避免斜度 > 1:12 的斜道</span>
+                </label>
+                <div class="hint">💡 勾選後，搜尋結果與路線規劃會自動過濾不適合的選項。</div>
+            </div>
+
             <button type="submit" id="plan-btn">♿ 規劃無障礙路線</button>
             <div id="route-result"></div>
         </form>
@@ -148,68 +179,217 @@
             maxZoom: 20, attribution: '地圖資料：地政總署 | Leaflet'
         }).addTo(map);
 
+        // ============================================================
+        // 擴充版 places 資料：加入 accessibility 無障礙細節參數
+        // ============================================================
         const places = [
-            { region: '順利邨', cat: '無障礙通道', name: '順利邨街市無障礙斜道', lat: 22.33170, lng: 114.22510, icon: '♿', keywords: ['通道', '斜道', '街市'], desc: '連接順利邨道與街市入口的寬闊斜道，兩旁設有雙層扶手，底頂設有觸覺警告帶。' },
-            { region: '順利邨', cat: '無障礙通道', name: '利業樓正門無障礙通道', lat: 22.33230, lng: 114.22480, icon: '♿', keywords: ['通道', '正門', '利業樓'], desc: '大廈正門設有自動趟門及平坦的連接通道，輪椅可輕鬆進出。注意大堂內電梯較窄。' },
-            { region: '順利邨', cat: '無障礙通道', name: '順利邨道往利安道過路處斜台', lat: 22.33150, lng: 114.22470, icon: '♿', keywords: ['通道', '過路處', '斜台'], desc: '行人過路處兩端均鋪設了低斜度斜台，並設有黃色觸覺引路帶引導。' },
-            { region: '順利邨', cat: '商場', name: '商場 - 順利邨道入口', lat: 22.33190, lng: 114.22480, icon: '⚠️', keywords: ['商場', '入口'], desc: '通道寬闊，一邊有一級梯級，另一邊設有斜道輔助。' },
-            { region: '順利邨', cat: '商場', name: '商場 - 公園入口', lat: 22.33070, lng: 114.22608, icon: '✅', keywords: ['商場', '公園'], desc: '寬闊斜道，設有觸覺引路帶在斜路上伸延。' },
-            { region: '順利邨', cat: '商場', name: '商場 - 往3樓電梯', lat: 22.33079, lng: 114.22638, icon: '🛗', keywords: ['商場', '電梯', '3樓'], desc: '由4級梯級和自動電梯組成。無發聲裝置，輪椅不可用。' },
-            { region: '順利邨', cat: '商場', name: '商場 - 往3樓長斜道', lat: 22.33200, lng: 114.22500, icon: '⚠️', keywords: ['商場', '斜道', '3樓'], desc: '多段長斜道，斜度略高，底頂無觸覺警告帶。' },
-            { region: '順利邨', cat: '學校', name: '順利天主教中學 - 正門', lat: 22.33280, lng: 114.22670, icon: '❌', keywords: ['中學', '學校'], desc: '寬闊的梯級通道，無升降設備輔助。' },
-            { region: '順利邨', cat: '醫療', name: '順利普通科門診診所（正門）', lat: 22.33160, lng: 114.22400, icon: '✅', keywords: ['診所', '醫生'], desc: '正門設自動金屬框玻璃趟門，門前有黃色觸覺引路帶。' },
-            { region: '順利邨', cat: '醫療', name: '順利普通科門診診所（暢通易達洗手間）', lat: 22.33160, lng: 114.22400, icon: '✅', keywords: ['診所', '洗手間', '廁所'], desc: '獨立無分性別洗手間，趟門淨闊 0.85m，座廁高 0.45m，設 L 型扶手。' },
-            { region: '順利邨', cat: '交通', name: '順利邨巴士總站（輪椅候車位）', lat: 22.33130, lng: 114.22530, icon: '⚠️', keywords: ['巴士', '搭車'], desc: '候車島前端設斜面及黃色輪椅候車標誌，通道寬闊平坦。但輪椅位偏緊。' },
-            { region: '順利邨', cat: '交通', name: '順利邨巴士總站（利安道行人路）', lat: 22.33140, lng: 114.22500, icon: '✅', keywords: ['巴士', '利安道'], desc: '面向利安道的行人路，寬闊平坦無障礙。' },
-            { region: '順利邨', cat: '文康', name: '順利邨公共圖書館（3樓入口）', lat: 22.33080, lng: 114.22610, icon: '✅', keywords: ['圖書館', '書'], desc: '出入口前設小平台和斜道，觸覺引路帶由 3 樓升降機門前引至斜道底部。' },
-            { region: '順利邨', cat: '文康', name: '順利邨體育館（地面暢通易達升降機）', lat: 22.33080, lng: 114.22610, icon: '🛗', keywords: ['體育館', '升降機'], desc: '地面大堂內有暢通易達升降機直上 3 樓圖書館，是關鍵無障礙路徑。' },
-            { region: '順利邨', cat: '無障礙通道', name: '行人天橋 KF109（順利邨公園側升降機）', lat: 22.33050, lng: 114.22580, icon: '♿', keywords: ['天橋', '升降機', 'KF109'], desc: '2019 年啟用的無障礙升降機，配合多段迴轉斜道連接橋面。' },
-            { region: '順利邨', cat: '無障礙通道', name: '行人天橋 KF109（利康樓側升降機）', lat: 22.33110, lng: 114.22520, icon: '♿', keywords: ['天橋', '升降機', 'KF109'], desc: '天橋近順利邨端的無障礙升降機，連接利康樓 3 樓走廊。' },
-            { region: '順利邨', cat: '無障礙通道', name: '新清水灣道行人隧道 KS27 升降機', lat: 22.33350, lng: 114.22380, icon: '♿', keywords: ['隧道', '升降機', 'KS27'], desc: '2020 年投入使用的無障礙升降機，連接新清水灣道和順利邨道。' },
-            { region: '順利邨', cat: '停車場', name: '順利停車場 - 出入口', lat: 22.33310, lng: 114.22450, icon: '❌', keywords: ['停車場', '泊車'], desc: '出入口處有兩級梯級阻礙，兩邊無扶手。' },
-            { region: '順利邨', cat: '停車場', name: '順利B停車場（利業樓側斜道入口）', lat: 22.33250, lng: 114.22490, icon: '⚠️', keywords: ['停車場', '斜道'], desc: '出入口前有低斜度斜道，但門淨闊僅 0.9m，較寬的輪椅需留意。' },
-            { region: '順利邨', cat: '停車場', name: '順利B停車場（順清街側通道）', lat: 22.33260, lng: 114.22530, icon: '❌', keywords: ['停車場', '順清街'], desc: '面向順清街的行人通道出入口處有兩級梯級阻礙。' },
-            { region: '順利邨', cat: '社區', name: '順利社區中心（禮堂入口）', lat: 22.33100, lng: 114.22450, icon: '⚠️', keywords: ['社區中心', '禮堂'], desc: '公開資料未明確標註入口斜道狀況，建議實地確認升降機及門檻。' },
-            { region: '順利邨', cat: '休憩', name: '順利邨公園', lat: 22.33019, lng: 114.22538, icon: '🌳', keywords: ['公園', '休憩'], desc: '設有暢通易達洗手間及觸覺引路帶。' },
-            { region: '順利邨', cat: '休憩', name: '順利邨公園（足球場旁暢通易達廁所）', lat: 22.33020, lng: 114.22540, icon: '✅', keywords: ['廁所', '公園'], desc: '斜道頂部設觸覺引路帶，一路伸延至足球場旁的廁所前。' },
-            { region: '順利邨', cat: '休憩', name: '順利邨公園（往體育館斜道入口）', lat: 22.33030, lng: 114.22560, icon: '✅', keywords: ['公園', '體育館'], desc: '從公園大閘進入後，一邊設斜道通往體育館正門旁。' },
-            { region: '觀塘', cat: '無障礙通道', name: '裕民坊 YM² 無障礙正門', lat: 22.31390, lng: 114.22350, icon: '♿', keywords: ['通道', '商場', 'YM2', '裕民坊'], desc: '裕民坊 YM² 商場正門設有寬闊平坦的無障礙通道，採用自動玻璃趟門。' },
-            { region: '觀塘', cat: '無障礙通道', name: '觀塘道/協和街交界行人天橋升降機', lat: 22.31550, lng: 114.22300, icon: '♿', keywords: ['通道', '天橋', '升降機'], desc: '連接觀塘道與協和街的行人天橋，兩端均設有無障礙升降機直達橋面。' },
-            { region: '觀塘', cat: '無障礙通道', name: '開源道行人過路處斜台', lat: 22.31280, lng: 114.22150, icon: '♿', keywords: ['通道', '過路處', '開源道'], desc: '開源道與觀塘道交界的行人過路處，所有安全島及兩端均設有低斜度斜台。' },
-            { region: '觀塘', cat: '醫療', name: '基督教聯合醫院（S座主入口）', lat: 22.32280, lng: 114.22680, icon: '✅', keywords: ['醫院', '聯合醫院'], desc: '設多個無障礙設施，輪椅人士可輕易上落。S座主要入口位於秀雅道。' },
-            { region: '觀塘', cat: '醫療', name: '基督教聯合醫院（急症室入口）', lat: 22.32240, lng: 114.22720, icon: '✅', keywords: ['醫院', '急症室'], desc: '急症室入口設有自動門及寬闊斜道，門前有觸覺引路帶。' },
-            { region: '觀塘', cat: '醫療', name: '觀塘地區康健站（基督教聯合醫院J座）', lat: 22.32300, lng: 114.22650, icon: '✅', keywords: ['康健站', '診所'], desc: '位於協和街130號。設無障礙入口、暢通易達服務櫃檯及洗手間。' },
-            { region: '觀塘', cat: '醫療', name: '容鳳書紀念中心（社會衛生科診所）', lat: 22.32150, lng: 114.22850, icon: '✅', keywords: ['診所', '容鳳書'], desc: '位於茶果嶺道79號。設有無障礙通道設施。' },
-            { region: '觀塘', cat: '醫療', name: '觀塘牙科診所（觀塘社區健康中心）', lat: 22.31500, lng: 114.22100, icon: '✅', keywords: ['牙科', '診所'], desc: '位於協和街60號。設有無障礙場地入口、升降機及洗手間。' },
-            { region: '觀塘', cat: '商場', name: 'APM 創紀之城五期', lat: 22.31230, lng: 114.22520, icon: '✅', keywords: ['商場', 'APM', '購物'], desc: '連接港鐵觀塘站，設有多個無障礙設施，包括升降機及洗手間。' },
-            { region: '觀塘', cat: '商場', name: '觀塘廣場（開源道入口）', lat: 22.31380, lng: 114.22080, icon: '⚠️', keywords: ['商場', '觀塘廣場'], desc: '開源道入口設有斜道，但斜度略高，商場內部分樓層通道較窄。' },
-            { region: '觀塘', cat: '交通', name: '港鐵觀塘站（A1出口升降機）', lat: 22.31200, lng: 114.22550, icon: '✅', keywords: ['港鐵', '地鐵', '觀塘站'], desc: 'A1出口設有升降機連接地面與車站大堂，另設輪椅升降台。' },
-            { region: '觀塘', cat: '交通', name: '觀塘巴士總站（輪椅候車位）', lat: 22.31350, lng: 114.22450, icon: '⚠️', keywords: ['巴士', '總站'], desc: '設有輪椅候車位，部分候車島與行人路之間有輕微高低差。' },
-            { region: '觀塘', cat: '社區', name: '觀塘社區中心（禮堂入口）', lat: 22.31480, lng: 114.22050, icon: '⚠️', keywords: ['社區中心', '禮堂'], desc: '位於翠屏道17號。禮堂入口設有斜道，惟斜道較短且坡度偏陡。' },
-            { region: '觀塘', cat: '休憩', name: '觀塘海濱花園（近裕民坊入口）', lat: 22.30850, lng: 114.21900, icon: '✅', keywords: ['公園', '海濱'], desc: '全段設無障礙通道，路面平坦寬闊，沿途設多個暢通易達洗手間。' },
-            { region: '觀塘', cat: '休憩', name: '觀塘遊樂場（入口斜道）', lat: 22.31620, lng: 114.21900, icon: '✅', keywords: ['公園', '遊樂場'], desc: '主要入口設有斜道，兩邊有扶手，底頂有觸覺警告帶。' }
+            // === 順利邨 ===
+            { region: '順利邨', cat: '無障礙通道', name: '順利邨街市無障礙斜道', lat: 22.33170, lng: 114.22510, icon: '♿', keywords: ['通道', '斜道', '街市'],
+              accessibility: { rampGradient: '1:12', surface: '平滑防滑地磚', hasHandrail: true, hasTactile: true, isCovered: false },
+              desc: '連接順利邨道與街市入口的寬闊斜道，兩旁設有雙層扶手，底頂設有觸覺警告帶。' },
+            { region: '順利邨', cat: '無障礙通道', name: '利業樓正門無障礙通道', lat: 22.33230, lng: 114.22480, icon: '♿', keywords: ['通道', '正門', '利業樓'],
+              accessibility: { doorWidth: '95 cm', surface: '平坦', hasHandrail: false, isCovered: false },
+              desc: '大廈正門設有自動趟門及平坦的連接通道，輪椅可輕鬆進出。注意大堂內電梯較窄。' },
+            { region: '順利邨', cat: '無障礙通道', name: '順利邨道往利安道過路處斜台', lat: 22.33150, lng: 114.22470, icon: '♿', keywords: ['通道', '過路處', '斜台'],
+              accessibility: { rampGradient: '1:14', surface: '平滑', hasTactile: true, isCovered: false },
+              desc: '行人過路處兩端均鋪設了低斜度斜台，並設有黃色觸覺引路帶引導。' },
+            { region: '順利邨', cat: '商場', name: '商場 - 順利邨道入口', lat: 22.33190, lng: 114.22480, icon: '⚠️', keywords: ['商場', '入口'],
+              accessibility: { rampGradient: '1:10 (略陡)', surface: '平滑', isSteep: true, isCovered: true },
+              desc: '通道寬闊，一邊有一級梯級，另一邊設有斜道輔助。' },
+            { region: '順利邨', cat: '商場', name: '商場 - 公園入口', lat: 22.33070, lng: 114.22608, icon: '✅', keywords: ['商場', '公園'],
+              accessibility: { rampGradient: '1:12', surface: '平滑', hasTactile: true, isCovered: true },
+              desc: '寬闊斜道，設有觸覺引路帶在斜路上伸延。' },
+            { region: '順利邨', cat: '商場', name: '商場 - 往3樓電梯', lat: 22.33079, lng: 114.22638, icon: '🛗', keywords: ['商場', '電梯', '3樓'],
+              accessibility: { isAccessible: false, reason: '無發聲裝置，輪椅不可用' },
+              desc: '由4級梯級和自動電梯組成。無發聲裝置，輪椅不可用。' },
+            { region: '順利邨', cat: '商場', name: '商場 - 往3樓長斜道', lat: 22.33200, lng: 114.22500, icon: '⚠️', keywords: ['商場', '斜道', '3樓'],
+              accessibility: { rampGradient: '1:8 (陡峭)', surface: '一般地磚', isSteep: true, hasTactile: false, isCovered: true },
+              desc: '多段長斜道，斜度略高，底頂無觸覺警告帶。手動輪椅需協助。' },
+            { region: '順利邨', cat: '學校', name: '順利天主教中學 - 正門', lat: 22.33280, lng: 114.22670, icon: '❌', keywords: ['中學', '學校'],
+              accessibility: { isAccessible: false, reason: '只有梯級，無升降設備' },
+              desc: '寬闊的梯級通道，無升降設備輔助。' },
+            { region: '順利邨', cat: '醫療', name: '順利普通科門診診所（正門）', lat: 22.33160, lng: 114.22400, icon: '✅', keywords: ['診所', '醫生'],
+              accessibility: { doorWidth: '90 cm', rampGradient: '1:14', surface: '平滑防滑地磚', turningSpace: '充足', hasTactile: true, isCovered: true },
+              desc: '正門設自動金屬框玻璃趟門，門前有黃色觸覺引路帶。' },
+            { region: '順利邨', cat: '醫療', name: '順利普通科門診診所（暢通易達洗手間）', lat: 22.33160, lng: 114.22400, icon: '✅', keywords: ['診所', '洗手間', '廁所'],
+              accessibility: { doorWidth: '85 cm', turningSpace: '直徑 > 150cm', hasGrabBar: true, isAccessibleToilet: true, isCovered: true },
+              desc: '獨立無分性別洗手間，趟門淨闊 0.85m，座廁高 0.45m，設 L 型扶手。' },
+            { region: '順利邨', cat: '交通', name: '順利邨巴士總站（輪椅候車位）', lat: 22.33130, lng: 114.22530, icon: '⚠️', keywords: ['巴士', '搭車'],
+              accessibility: { surface: '平坦', turningSpace: '偏緊', isCovered: true },
+              desc: '候車島前端設斜面及黃色輪椅候車標誌，通道寬闊平坦。但輪椅位偏緊。' },
+            { region: '順利邨', cat: '交通', name: '順利邨巴士總站（利安道行人路）', lat: 22.33140, lng: 114.22500, icon: '✅', keywords: ['巴士', '利安道'],
+              accessibility: { surface: '平坦寬闊', isCovered: false },
+              desc: '面向利安道的行人路，寬闊平坦無障礙。' },
+            { region: '順利邨', cat: '文康', name: '順利邨公共圖書館（3樓入口）', lat: 22.33080, lng: 114.22610, icon: '✅', keywords: ['圖書館', '書'],
+              accessibility: { rampGradient: '1:12', surface: '平滑', hasTactile: true, isCovered: true },
+              desc: '出入口前設小平台和斜道，觸覺引路帶由 3 樓升降機門前引至斜道底部。' },
+            { region: '順利邨', cat: '文康', name: '順利邨體育館（地面暢通易達升降機）', lat: 22.33080, lng: 114.22610, icon: '🛗', keywords: ['體育館', '升降機'],
+              accessibility: { isElevator: true, isAccessible: true, isCovered: true },
+              desc: '地面大堂內有暢通易達升降機直上 3 樓圖書館，是關鍵無障礙路徑。' },
+            { region: '順利邨', cat: '無障礙通道', name: '行人天橋 KF109（順利邨公園側升降機）', lat: 22.33050, lng: 114.22580, icon: '♿', keywords: ['天橋', '升降機', 'KF109'],
+              accessibility: { isElevator: true, isAccessible: true, rampGradient: '1:12', isCovered: false },
+              desc: '2019 年啟用的無障礙升降機，配合多段迴轉斜道連接橋面。' },
+            { region: '順利邨', cat: '無障礙通道', name: '行人天橋 KF109（利康樓側升降機）', lat: 22.33110, lng: 114.22520, icon: '♿', keywords: ['天橋', '升降機', 'KF109'],
+              accessibility: { isElevator: true, isAccessible: true, isCovered: false },
+              desc: '天橋近順利邨端的無障礙升降機，連接利康樓 3 樓走廊。' },
+            { region: '順利邨', cat: '無障礙通道', name: '新清水灣道行人隧道 KS27 升降機', lat: 22.33350, lng: 114.22380, icon: '♿', keywords: ['隧道', '升降機', 'KS27'],
+              accessibility: { isElevator: true, isAccessible: true, isCovered: false },
+              desc: '2020 年投入使用的無障礙升降機，連接新清水灣道和順利邨道。' },
+            { region: '順利邨', cat: '停車場', name: '順利停車場 - 出入口', lat: 22.33310, lng: 114.22450, icon: '❌', keywords: ['停車場', '泊車'],
+              accessibility: { isAccessible: false, reason: '出入口有兩級梯級，無扶手' },
+              desc: '出入口處有兩級梯級阻礙，兩邊無扶手。' },
+            { region: '順利邨', cat: '停車場', name: '順利B停車場（利業樓側斜道入口）', lat: 22.33250, lng: 114.22490, icon: '⚠️', keywords: ['停車場', '斜道'],
+              accessibility: { doorWidth: '90 cm (偏窄)', rampGradient: '1:14', surface: '平滑', isCovered: false },
+              desc: '出入口前有低斜度斜道，但門淨闊僅 0.9m，較寬的輪椅需留意。' },
+            { region: '順利邨', cat: '停車場', name: '順利B停車場（順清街側通道）', lat: 22.33260, lng: 114.22530, icon: '❌', keywords: ['停車場', '順清街'],
+              accessibility: { isAccessible: false, reason: '有兩級梯級阻礙' },
+              desc: '面向順清街的行人通道出入口處有兩級梯級阻礙。' },
+            { region: '順利邨', cat: '社區', name: '順利社區中心（禮堂入口）', lat: 22.33100, lng: 114.22450, icon: '⚠️', keywords: ['社區中心', '禮堂'],
+              accessibility: { rampGradient: '未知', isCovered: true },
+              desc: '公開資料未明確標註入口斜道狀況，建議實地確認升降機及門檻。' },
+            { region: '順利邨', cat: '休憩', name: '順利邨公園', lat: 22.33019, lng: 114.22538, icon: '🌳', keywords: ['公園', '休憩'],
+              accessibility: { surface: '平坦', hasTactile: true, isAccessibleToilet: true, isCovered: false },
+              desc: '設有暢通易達洗手間及觸覺引路帶。' },
+            { region: '順利邨', cat: '休憩', name: '順利邨公園（足球場旁暢通易達廁所）', lat: 22.33020, lng: 114.22540, icon: '✅', keywords: ['廁所', '公園'],
+              accessibility: { rampGradient: '1:12', hasTactile: true, isAccessibleToilet: true, isCovered: false },
+              desc: '斜道頂部設觸覺引路帶，一路伸延至足球場旁的廁所前。' },
+            { region: '順利邨', cat: '休憩', name: '順利邨公園（往體育館斜道入口）', lat: 22.33030, lng: 114.22560, icon: '✅', keywords: ['公園', '體育館'],
+              accessibility: { rampGradient: '1:12', surface: '平滑', isCovered: false },
+              desc: '從公園大閘進入後，一邊設斜道通往體育館正門旁。' },
+
+            // === 觀塘 ===
+            { region: '觀塘', cat: '無障礙通道', name: '裕民坊 YM² 無障礙正門', lat: 22.31390, lng: 114.22350, icon: '♿', keywords: ['通道', '商場', 'YM2', '裕民坊'],
+              accessibility: { doorWidth: '自動門', surface: '平滑大理石', turningSpace: '充足', isCovered: true },
+              desc: '裕民坊 YM² 商場正門設有寬闊平坦的無障礙通道，採用自動玻璃趟門。' },
+            { region: '觀塘', cat: '無障礙通道', name: '觀塘道/協和街交界行人天橋升降機', lat: 22.31550, lng: 114.22300, icon: '♿', keywords: ['通道', '天橋', '升降機'],
+              accessibility: { isElevator: true, isAccessible: true, isCovered: false },
+              desc: '連接觀塘道與協和街的行人天橋，兩端均設有無障礙升降機直達橋面。' },
+            { region: '觀塘', cat: '無障礙通道', name: '開源道行人過路處斜台', lat: 22.31280, lng: 114.22150, icon: '♿', keywords: ['通道', '過路處', '開源道'],
+              accessibility: { rampGradient: '1:14', surface: '平滑', hasTactile: true, isCovered: false },
+              desc: '開源道與觀塘道交界的行人過路處，所有安全島及兩端均設有低斜度斜台。' },
+            { region: '觀塘', cat: '醫療', name: '基督教聯合醫院（S座主入口）', lat: 22.32280, lng: 114.22680, icon: '✅', keywords: ['醫院', '聯合醫院'],
+              accessibility: { doorWidth: '自動門', rampGradient: '1:14', surface: '平滑', turningSpace: '充足', isCovered: true },
+              desc: '設多個無障礙設施，輪椅人士可輕易上落。S座主要入口位於秀雅道。' },
+            { region: '觀塘', cat: '醫療', name: '基督教聯合醫院（急症室入口）', lat: 22.32240, lng: 114.22720, icon: '✅', keywords: ['醫院', '急症室'],
+              accessibility: { doorWidth: '自動門', rampGradient: '1:12', hasTactile: true, isCovered: true },
+              desc: '急症室入口設有自動門及寬闊斜道，門前有觸覺引路帶。' },
+            { region: '觀塘', cat: '醫療', name: '觀塘地區康健站（基督教聯合醫院J座）', lat: 22.32300, lng: 114.22650, icon: '✅', keywords: ['康健站', '診所'],
+              accessibility: { doorWidth: '自動門', turningSpace: '充足', isAccessibleToilet: true, isCovered: true },
+              desc: '位於協和街130號。設無障礙入口、暢通易達服務櫃檯及洗手間。' },
+            { region: '觀塘', cat: '醫療', name: '容鳳書紀念中心（社會衛生科診所）', lat: 22.32150, lng: 114.22850, icon: '✅', keywords: ['診所', '容鳳書'],
+              accessibility: { doorWidth: '90 cm', surface: '平滑', isCovered: true },
+              desc: '位於茶果嶺道79號。設有無障礙通道設施。' },
+            { region: '觀塘', cat: '醫療', name: '觀塘牙科診所（觀塘社區健康中心）', lat: 22.31500, lng: 114.22100, icon: '✅', keywords: ['牙科', '診所'],
+              accessibility: { doorWidth: '90 cm', isElevator: true, isAccessibleToilet: true, isCovered: true },
+              desc: '位於協和街60號。設有無障礙場地入口、升降機及洗手間。' },
+            { region: '觀塘', cat: '商場', name: 'APM 創紀之城五期', lat: 22.31230, lng: 114.22520, icon: '✅', keywords: ['商場', 'APM', '購物'],
+              accessibility: { doorWidth: '自動門', surface: '平滑大理石', turningSpace: '充足', isCovered: true },
+              desc: '連接港鐵觀塘站，設有多個無障礙設施，包括升降機及洗手間。' },
+            { region: '觀塘', cat: '商場', name: '觀塘廣場（開源道入口）', lat: 22.31380, lng: 114.22080, icon: '⚠️', keywords: ['商場', '觀塘廣場'],
+              accessibility: { rampGradient: '1:10 (略陡)', surface: '平滑', isSteep: true, isCovered: true },
+              desc: '開源道入口設有斜道，但斜度略高，商場內部分樓層通道較窄。' },
+            { region: '觀塘', cat: '交通', name: '港鐵觀塘站（A1出口升降機）', lat: 22.31200, lng: 114.22550, icon: '✅', keywords: ['港鐵', '地鐵', '觀塘站'],
+              accessibility: { isElevator: true, isAccessible: true, isCovered: true },
+              desc: 'A1出口設有升降機連接地面與車站大堂，另設輪椅升降台。' },
+            { region: '觀塘', cat: '交通', name: '觀塘巴士總站（輪椅候車位）', lat: 22.31350, lng: 114.22450, icon: '⚠️', keywords: ['巴士', '總站'],
+              accessibility: { surface: '平坦', turningSpace: '充足', isCovered: true },
+              desc: '設有輪椅候車位，部分候車島與行人路之間有輕微高低差。' },
+            { region: '觀塘', cat: '社區', name: '觀塘社區中心（禮堂入口）', lat: 22.31480, lng: 114.22050, icon: '⚠️', keywords: ['社區中心', '禮堂'],
+              accessibility: { rampGradient: '1:10 (偏陡)', surface: '平滑', isSteep: true, isCovered: true },
+              desc: '位於翠屏道17號。禮堂入口設有斜道，惟斜道較短且坡度偏陡。' },
+            { region: '觀塘', cat: '休憩', name: '觀塘海濱花園（近裕民坊入口）', lat: 22.30850, lng: 114.21900, icon: '✅', keywords: ['公園', '海濱'],
+              accessibility: { surface: '木製棧道/平滑', turningSpace: '極佳', isAccessibleToilet: true, isCovered: false },
+              desc: '全段設無障礙通道，路面平坦寬闊，沿途設多個暢通易達洗手間。' },
+            { region: '觀塘', cat: '休憩', name: '觀塘遊樂場（入口斜道）', lat: 22.31620, lng: 114.21900, icon: '✅', keywords: ['公園', '遊樂場'],
+              accessibility: { rampGradient: '1:12', surface: '平滑', hasHandrail: true, hasTactile: true, isCovered: false },
+              desc: '主要入口設有斜道，兩邊有扶手，底頂有觸覺警告帶。' }
         ];
 
+        // ============================================================
+        // 地圖標記：根據 accessibility 參數調整視覺樣式
+        // ============================================================
         const markerMap = {};
         places.forEach(place => {
             const isAccess = place.cat === '無障礙通道' || place.icon === '♿';
+            const isSteep = place.accessibility?.isSteep;
+            const isInaccessible = place.accessibility?.isAccessible === false;
+
+            let iconBg = '';
+            if (isSteep) iconBg = 'background:#ffebee; border:2px solid #d32f2f; border-radius:50%; width:36px; height:36px; line-height:32px;';
+            else if (isAccess) iconBg = 'background:#eaf2f9; border:2px solid #1f6fa8; border-radius:50%; width:36px; height:36px; line-height:32px;';
+            else if (isInaccessible) iconBg = 'background:#ffebee; border:2px solid #d32f2f; border-radius:50%; width:36px; height:36px; line-height:32px;';
+
             const customIcon = L.divIcon({
-                html: `<div style="font-size:24px;text-align:center;text-shadow:0 0 4px #fff; ${isAccess ? 'background:#eaf2f9; border:2px solid #1f6fa8; border-radius:50%; width:36px; height:36px; line-height:32px;' : ''}">${place.icon}</div>`,
-                className: '', iconSize: isAccess ? [36, 36] : [30, 30], iconAnchor: isAccess ? [18, 18] : [15, 15], popupAnchor: [0, -15]
+                html: `<div style="font-size:24px;text-align:center;text-shadow:0 0 4px #fff; ${iconBg}">${place.icon}</div>`,
+                className: '', iconSize: iconBg ? [36, 36] : [30, 30], iconAnchor: iconBg ? [18, 18] : [15, 15], popupAnchor: [0, -15]
             });
+
+            // 產生無障礙細節面板 HTML
+            const accPanelHtml = buildAccessibilityPanel(place);
 
             const marker = L.marker([place.lat, place.lng], { icon: customIcon, title: place.name })
                 .addTo(map)
                 .bindPopup(`
-                    <div style="font-weight:bold;font-size:14px;margin-bottom:5px;">${place.name}</div>
+                    <div style="font-weight:bold;font-size:14px;margin-bottom:4px;">${place.name}</div>
                     <div style="font-size:12px;color:#7a8a95;margin-bottom:6px;">${place.region} · <span style="${isAccess ? 'color:#1f6fa8;font-weight:bold;' : ''}">${place.cat}</span></div>
                     <div style="color:#444;font-size:13px;line-height:1.5;">${place.desc}</div>
-                `, { maxWidth: 280 })
-                .bindTooltip(place.name, { permanent: false, direction: 'top', className: `map-label ${isAccess ? 'is-accessible' : ''}`, offset: [0, -18] });
+                    ${accPanelHtml}
+                `, { maxWidth: 300 });
 
+            let labelClass = 'map-label';
+            if (isSteep) labelClass += ' is-steep';
+            else if (isAccess) labelClass += ' is-accessible';
+
+            marker.bindTooltip(place.name, { permanent: false, direction: 'top', className: labelClass, offset: [0, -18] });
             markerMap[place.name] = marker;
         });
 
+        // 產生無障礙細節面板 HTML 的輔助函數
+        function buildAccessibilityPanel(place) {
+            const acc = place.accessibility;
+            if (!acc) return '';
+
+            // 若明確標示為不可通行
+            if (acc.isAccessible === false) {
+                return `
+                <div class="acc-panel">
+                    <div class="acc-title" style="color:#d32f2f;">♿ 無障礙評估</div>
+                    <div class="acc-alert warn">❌ 不適合輪椅通行：${acc.reason || '設施不暢通'}</div>
+                </div>`;
+            }
+
+            const items = [];
+            if (acc.doorWidth) items.push(`<div>🚪 門寬: <b class="${parseInt(acc.doorWidth) < 85 ? 'bad' : 'good'}">${acc.doorWidth}</b></div>`);
+            if (acc.rampGradient) {
+                const isBad = acc.rampGradient.includes('陡') || acc.rampGradient.includes('1:8') || acc.rampGradient.includes('1:10');
+                items.push(`<div>📐 斜度: <b class="${isBad ? 'bad' : 'good'}">${acc.rampGradient}</b></div>`);
+            }
+            if (acc.surface) items.push(`<div>🛤️ 路面: <b>${acc.surface}</b></div>`);
+            if (acc.turningSpace) items.push(`<div>🔄 迴轉: <b class="good">${acc.turningSpace}</b></div>`);
+            if (acc.hasHandrail) items.push(`<div>🤲 扶手: <b class="good">有</b></div>`);
+            if (acc.hasTactile) items.push(`<div>👆 觸覺帶: <b class="good">有</b></div>`);
+            if (acc.hasGrabBar) items.push(`<div>🦯 扶手杆: <b class="good">有</b></div>`);
+            if (acc.isAccessibleToilet) items.push(`<div>🚽 無障礙廁所: <b class="good">有</b></div>`);
+            if (acc.isElevator) items.push(`<div>🛗 升降機: <b class="good">有</b></div>`);
+
+            let alerts = '';
+            if (acc.isSteep) alerts += '<div class="acc-alert warn">⚠️ 斜度較陡，手動輪椅建議有人協助</div>';
+            if (acc.isCovered === true) alerts += '<div class="acc-alert info">☂️ 全程有上蓋</div>';
+            else if (acc.isCovered === false) alerts += '<div class="acc-alert" style="color:#e65100;">☀️ 露天環境，注意日曬雨淋</div>';
+
+            if (items.length === 0 && !alerts) return '';
+
+            return `
+            <div class="acc-panel">
+                <div class="acc-title">♿ 無障礙細節評估</div>
+                ${items.length > 0 ? `<div class="acc-grid">${items.join('')}</div>` : ''}
+                ${alerts}
+            </div>`;
+        }
+
+        // ============================================================
+        // 面板切換
+        // ============================================================
         const toggleBtn = document.getElementById('search-toggle-btn');
         const routePanel = document.getElementById('route-panel');
         const closePanelBtn = document.getElementById('close-panel-btn');
@@ -224,14 +404,14 @@
             toggleBtn.style.display = 'flex';
         });
 
+        // ============================================================
+        // GPS 定位
+        // ============================================================
         let userLocationMarker = null;
         let userAccuracyCircle = null;
 
         document.getElementById('gps-btn').addEventListener('click', () => {
-            if (!navigator.geolocation) {
-                alert('您的瀏覽器不支援 GPS 定位功能。');
-                return;
-            }
+            if (!navigator.geolocation) { alert('您的瀏覽器不支援 GPS 定位功能。'); return; }
             const btn = document.getElementById('gps-btn');
             btn.textContent = '⏳';
             navigator.geolocation.getCurrentPosition(
@@ -258,7 +438,25 @@
             );
         });
 
+        // ============================================================
+        // 自動完成搜尋（含輪椅偏好過濾）
+        // ============================================================
         const AREA_TERMS = { '順利邨': '順利邨', '順利': '順利邨', '觀塘': '觀塘', 'kwun tong': '觀塘' };
+
+        // 判斷某個 place 是否符合目前的輪椅偏好
+        function matchesWheelchairPref(place) {
+            const avoidSteep = document.getElementById('avoid-steep')?.checked;
+            const preferCovered = document.getElementById('prefer-covered')?.checked;
+            const acc = place.accessibility || {};
+
+            // 明確不可通行的地點一律過濾
+            if (acc.isAccessible === false) return false;
+            // 避免陡峭
+            if (avoidSteep && acc.isSteep) return false;
+            // 優先有上蓋：只保留有上蓋的地點
+            if (preferCovered && acc.isCovered === false) return false;
+            return true;
+        }
 
         function createLocationInput(inputId, suggestionsId) {
             const inputEl = document.getElementById(inputId);
@@ -271,21 +469,28 @@
             function search(q) {
                 q = q.trim().toLowerCase();
                 if (!q) { hide(); return; }
+
+                const avoidSteep = document.getElementById('avoid-steep')?.checked;
+                const preferCovered = document.getElementById('prefer-covered')?.checked;
+                const hasFilter = avoidSteep || preferCovered;
+
                 let localResults = [], label = '本地設施';
                 let matchedRegion = AREA_TERMS[q];
 
                 if (matchedRegion) {
-                    localResults = places.filter(p => p.region === matchedRegion).map(p => ({ name: p.name, lat: p.lat, lng: p.lng, region: p.region }));
-                    label = matchedRegion + '全部設施';
+                    localResults = places.filter(p => p.region === matchedRegion && matchesWheelchairPref(p))
+                        .map(p => ({ name: p.name, lat: p.lat, lng: p.lng, region: p.region }));
+                    label = matchedRegion + (hasFilter ? ' (已套用無障礙過濾)' : ' 全部設施');
                 } else {
-                    localResults = places.filter(p => 
-                        p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q) || (p.keywords && p.keywords.some(k => k.includes(q)))
-                    ).slice(0, 20).map(p => ({ name: p.name, lat: p.lat, lng: p.lng, region: p.region }));
+                    localResults = places.filter(p => {
+                        const matchText = p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q) || (p.keywords && p.keywords.some(k => k.includes(q)));
+                        return matchText && matchesWheelchairPref(p);
+                    }).slice(0, 20).map(p => ({ name: p.name, lat: p.lat, lng: p.lng, region: p.region }));
                 }
 
                 suggestionsEl.innerHTML = ''; items = [];
                 if (localResults.length === 0) {
-                    suggestionsEl.innerHTML = '<li class="empty" style="padding:10px;color:#7a8a95;">找不到地點</li>';
+                    suggestionsEl.innerHTML = '<li class="empty" style="padding:10px;color:#7a8a95;">找不到符合條件的地點</li>';
                 } else {
                     const labelLi = document.createElement('li');
                     labelLi.className = 'group-label'; labelLi.textContent = label;
@@ -317,6 +522,14 @@
             });
 
             document.addEventListener('click', (e) => { if (!inputEl.contains(e.target) && !suggestionsEl.contains(e.target)) hide(); });
+
+            // 當偏好勾選改變時，若目前輸入框有文字，重新搜尋
+            ['avoid-steep', 'prefer-covered'].forEach(id => {
+                document.getElementById(id).addEventListener('change', () => {
+                    if (inputEl.value.trim()) search(inputEl.value);
+                });
+            });
+
             return { getSelected: () => selected, resolve: async () => selected };
         }
 
@@ -325,22 +538,14 @@
 
         let currentRouteLayer = null;
 
-        // 輔助函數：將 ORS 的 step type 轉換為直觀圖示
         function getStepIcon(type) {
             switch(type) {
-                case 1: return '🚶'; // 出發
-                case 2: return '➡️'; // 右轉
-                case 3: return '⬅️'; // 左轉
-                case 4: return '↗️'; // 微右
-                case 5: return '↖️'; // 微左
-                case 6: return '🏁'; // 抵達
-                case 7: return '🔄'; // 圓環
-                case 10: return '📍'; // 途經點
-                default: return '⬆️'; // 直行或其他
+                case 1: return '🚶'; case 2: return '➡️'; case 3: return '⬅️';
+                case 4: return '↗️'; case 5: return '↖️'; case 6: return '🏁';
+                case 7: return '🔄'; case 10: return '📍'; default: return '⬆️';
             }
         }
 
-        // 輔助函數：簡體轉繁體 (針對 ORS 回傳的中文)
         function zhCNtoZHTW(text) {
             return text
                 .replace(/右转/g, '右轉').replace(/左转/g, '左轉')
@@ -349,6 +554,9 @@
                 .replace(/公里/g, '公里');
         }
 
+        // ============================================================
+        // 路線規劃（含輪椅進階 API 參數）
+        // ============================================================
         document.getElementById('route-panel').addEventListener('submit', async (e) => {
             e.preventDefault();
             const resultEl = document.getElementById('route-result');
@@ -357,35 +565,46 @@
             const start = startCtl.getSelected();
             const end = endCtl.getSelected();
 
-            if (!start || !end) { 
-                alert('請從建議列表中選擇起點和終點。'); 
-                return; 
-            }
+            if (!start || !end) { alert('請從建議列表中選擇起點和終點。'); return; }
 
             planBtn.disabled = true;
             planBtn.textContent = '⏳ 規劃無障礙路線中...';
             resultEl.style.display = 'block';
             resultEl.innerHTML = '<div style="color:#7a8a95; text-align:center; padding: 10px 0;">正在計算無障礙路線...</div>';
 
-            if (currentRouteLayer) {
-                map.removeLayer(currentRouteLayer);
-            }
+            if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+
+            // 讀取偏好
+            const avoidSteep = document.getElementById('avoid-steep').checked;
+            const preferCovered = document.getElementById('prefer-covered').checked;
 
             try {
+                // 建立輪椅專屬 API 選項
+                const wheelchairOptions = {
+                    wheelchair: {
+                        // 強制避免階梯、未鋪設路面、淺灘
+                        avoid_features: ['steps', 'unpaved', 'ford']
+                    }
+                };
+
+                // 若勾選「避免陡峭」，加入更多限制
+                if (avoidSteep) {
+                    wheelchairOptions.wheelchair.max_incline = 8; // 限制最大斜度為 8%
+                }
+
                 const response = await fetch('https://api.openrouteservice.org/v2/directions/wheelchair/geojson', {
                     method: 'POST',
                     headers: {
+                        // ⚠️ 安全提醒：此 API Key 暴露在前端，建議改用後端代理
                         'Authorization': 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6Ijg2MTJiYWIzMWIyYTRhMjRhNzFhMThmMTBiM2E3ZGIzIiwiaCI6Im11cm11cjY0In0=',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        coordinates: [
-                            [start.lng, start.lat],
-                            [end.lng, end.lat]
-                        ],
+                        coordinates: [[start.lng, start.lat], [end.lng, end.lat]],
                         preference: 'recommended',
                         units: 'm',
-                        language: 'zh' // ✅ 新增：要求回傳中文指引
+                        language: 'zh',
+                        options: wheelchairOptions
                     })
                 });
 
@@ -402,10 +621,7 @@
                 const coordinates = data.features[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
                 
                 currentRouteLayer = L.polyline(coordinates, {
-                    color: '#1f6fa8',
-                    weight: 6,
-                    opacity: 0.85,
-                    lineJoin: 'round'
+                    color: '#1f6fa8', weight: 6, opacity: 0.85, lineJoin: 'round'
                 }).addTo(map);
 
                 map.fitBounds(currentRouteLayer.getBounds(), { padding: [60, 60], maxZoom: 17 });
@@ -421,7 +637,6 @@
                 const distanceKm = (summary.distance / 1000).toFixed(2);
                 const durationMin = Math.round(summary.duration / 60);
 
-                // ✅ 新增：解析並生成詳細步驟清單
                 const steps = data.features[0].properties.segments[0].steps;
                 let stepsHtml = '<div class="step-list">';
                 steps.forEach((step) => {
@@ -432,17 +647,35 @@
                     const timeText = Math.round(step.duration / 60) + ' 分鐘';
                     const instruction = zhCNtoZHTW(step.instruction);
 
+                    // 檢查起點/終點是否為陡峭地點，加入警告提示
+                    let accessTip = '';
+                    if (start.accessibility?.isSteep || end.accessibility?.isSteep) {
+                        accessTip = '<div class="step-access-tip" style="color:#d32f2f;">⚠️ 起點或終點附近斜道較陡，請注意安全</div>';
+                    } else if (start.accessibility?.isCovered === false || end.accessibility?.isCovered === false) {
+                        accessTip = '<div class="step-access-tip" style="color:#e65100;">☀️ 起點或終點為露天，請注意天氣</div>';
+                    }
+
                     stepsHtml += `
                         <div class="step-item">
                             <span class="step-icon">${icon}</span>
                             <div style="flex: 1;">
                                 <div class="step-text">${instruction}</div>
                                 <div class="step-meta">距離: ${distText} · 約 ${timeText}</div>
+                                ${accessTip}
                             </div>
                         </div>
                     `;
                 });
                 stepsHtml += '</div>';
+
+                // 路線偏好摘要
+                let prefSummary = '';
+                if (avoidSteep || preferCovered) {
+                    const tags = [];
+                    if (avoidSteep) tags.push('⚠️ 避免陡峭');
+                    if (preferCovered) tags.push('☂️ 優先有蓋');
+                    prefSummary = `<div style="margin-top:6px; font-size:12px; color:#1f6fa8;">已套用偏好：${tags.join(' · ')}</div>`;
+                }
 
                 resultEl.innerHTML = `
                     <div class="summary" style="color:#1a7f4b;">♿ 無障礙路線規劃成功</div>
@@ -450,6 +683,7 @@
                         <div>📏 ${distanceKm} 公里</div>
                         <div>⏱️ 約 ${durationMin} 分鐘</div>
                     </div>
+                    ${prefSummary}
                     ${stepsHtml}
                 `;
 
@@ -458,10 +692,7 @@
                 
                 if (currentRouteLayer) map.removeLayer(currentRouteLayer);
                 currentRouteLayer = L.polyline([[start.lat, start.lng], [end.lat, end.lng]], {
-                    color: '#d32f2f',
-                    weight: 4,
-                    opacity: 0.7,
-                    dashArray: '10, 10'
+                    color: '#d32f2f', weight: 4, opacity: 0.7, dashArray: '10, 10'
                 }).addTo(map);
                 map.fitBounds(currentRouteLayer.getBounds(), { padding: [60, 60], maxZoom: 17 });
 
