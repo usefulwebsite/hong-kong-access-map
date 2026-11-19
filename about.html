@@ -287,7 +287,6 @@
             <div class="logo">♿</div>
             <h1>順利邨・觀塘無障礙地圖</h1>
             <p class="tagline">為輪椅使用者打造的專屬出行助手<br>讓每一次出門都更安心、更順暢</p>
-            <span class="version">版本 1.2.0 · 2026 年 11 月</span>
         </div>
 
         <div class="stats-row">
@@ -450,28 +449,6 @@
             </div>
         </div>
 
-        <div class="section-card">
-            <h2><span class="icon">📋</span>版本資訊</h2>
-            <div style="font-size: 12px; color: #555; line-height: 1.7;">
-                <div><strong>版本 1.2.0</strong> (2026-11-18)</div>
-                <ul style="margin: 6px 0; padding-left: 18px;">
-                    <li>新增 18 個無障礙廁所地點</li>
-                    <li>新增「專屬路線偏好」功能</li>
-                    <li>優化無障礙細節評估面板</li>
-                    <li>新增評論與捐款功能</li>
-                </ul>
-                <div style="margin-top: 8px;"><strong>版本 1.1.0</strong> (2026-10-01)</div>
-                <ul style="margin: 6px 0; padding-left: 18px;">
-                    <li>新增列表頁與緊急快速鍵</li>
-                    <li>新增收藏與回報功能</li>
-                </ul>
-                <div style="margin-top: 8px;"><strong>版本 1.0.0</strong> (2026-08-15)</div>
-                <ul style="margin: 6px 0 0; padding-left: 18px;">
-                    <li>首次發布，涵蓋順利邨與觀塘地區</li>
-                </ul>
-            </div>
-        </div>
-
         <div style="text-align: center; padding: 16px; font-size: 11px; color: #7a8a95; line-height: 1.6;">
             © 2026 順利邨・觀塘無障礙地圖<br>
             以 ❤️ 打造，為無障礙世界而努力<br>
@@ -581,7 +558,7 @@
         </div>
     </div>
 
-    <!-- AlipayHK 轉帳彈窗（純文字版，無需圖片檔案） -->
+    <!-- AlipayHK 轉帳彈窗 -->
     <div class="modal-overlay" id="alipay-modal">
         <div class="modal" style="text-align: center;">
             <h3 style="justify-content: center;">🔵 AlipayHK 捐款</h3>
@@ -641,20 +618,14 @@
     <div class="toast" id="toast"></div>
 
     <nav id="bottom-nav">
-        <a href="index.html"><span class="icon">🗺️</span><span>地圖</span></a>
+        <a href="index.html" class="active"><span class="icon">🗺️</span><span>地圖</span></a>
         <a href="list.html"><span class="icon">📋</span><span>列表</span></a>
         <a href="about.html" class="active"><span class="icon">ℹ️</span><span>關於</span></a>
     </nav>
 
     <script>
-        // ============================================================
-        // ⚠️ 你的真實 AlipayHK 電話號碼
-        // ============================================================
         const ALIPAYHK_ACCOUNT = '+852 5372 6101';
 
-        // ============================================================
-        // 評論系統
-        // ============================================================
         let currentRating = 0;
         const reviews = JSON.parse(localStorage.getItem('a11y_reviews') || '[]');
 
@@ -674,21 +645,10 @@
 
         function submitReview() {
             const text = document.getElementById('review-text').value.trim();
-            if (currentRating === 0) {
-                showToast('請先選擇評分');
-                return;
-            }
-            if (!text) {
-                showToast('請填寫評論內容');
-                return;
-            }
+            if (currentRating === 0) { showToast('請先選擇評分'); return; }
+            if (!text) { showToast('請填寫評論內容'); return; }
 
-            reviews.unshift({
-                rating: currentRating,
-                text: text,
-                author: '匿名使用者',
-                date: new Date().toISOString()
-            });
+            reviews.unshift({ rating: currentRating, text: text, author: '匿名使用者', date: new Date().toISOString() });
             localStorage.setItem('a11y_reviews', JSON.stringify(reviews));
 
             document.getElementById('review-text').value = '';
@@ -705,7 +665,6 @@
             const starsEl = document.getElementById('avg-stars');
 
             countEl.textContent = reviews.length;
-
             if (reviews.length > 0) {
                 const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
                 avgEl.textContent = avg.toFixed(1);
@@ -722,74 +681,34 @@
                 const date = new Date(r.date);
                 const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
                 const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-                return `
-                    <div class="review-item">
-                        <div class="review-head">
-                            <span class="review-author">${r.author}</span>
-                            <span class="review-date">${dateStr}</span>
-                        </div>
-                        <div class="review-stars">${stars}</div>
-                        <div class="review-text">${escapeHtml(r.text)}</div>
-                    </div>
-                `;
+                return `<div class="review-item"><div class="review-head"><span class="review-author">${r.author}</span><span class="review-date">${dateStr}</span></div><div class="review-stars">${stars}</div><div class="review-text">${escapeHtml(r.text)}</div></div>`;
             }).join('');
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        function scrollToReview() { document.getElementById('review-section').scrollIntoView({ behavior: 'smooth' }); setTimeout(() => document.getElementById('review-text').focus(), 500); }
 
-        function scrollToReview() {
-            document.getElementById('review-section').scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => document.getElementById('review-text').focus(), 500);
-        }
-
-        // ============================================================
-        // 彈窗控制
-        // ============================================================
-        function openModal(id) {
-            document.getElementById(id).classList.add('show');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('show');
-        }
+        function openModal(id) { document.getElementById(id).classList.add('show'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
         function openReportModal() { openModal('report-modal'); }
         function openContactModal() { openModal('contact-modal'); }
         function openDonateModal() { openModal('donate-modal'); }
         function openVolunteerModal() { openModal('volunteer-modal'); }
 
         document.querySelectorAll('.modal-overlay').forEach(overlay => {
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) overlay.classList.remove('show');
-            });
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
         });
 
-        // ============================================================
-        // 表單提交
-        // ============================================================
         function submitReport() {
             const type = document.getElementById('report-type').value;
             const email = document.getElementById('report-email').value.trim();
             const desc = document.getElementById('report-desc').value.trim();
-
-            if (!desc) {
-                showToast('請填寫詳細說明');
-                return;
-            }
-
+            if (!desc) { showToast('請填寫詳細說明'); return; }
             const reports = JSON.parse(localStorage.getItem('a11y_project_reports') || '[]');
-            reports.push({
-                type, email, desc,
-                timestamp: new Date().toISOString()
-            });
+            reports.push({ type, email, desc, timestamp: new Date().toISOString() });
             localStorage.setItem('a11y_project_reports', JSON.stringify(reports));
-
-            document.getElementById('report-email').value = '';
-            document.getElementById('report-desc').value = '';
-            closeModal('report-modal');
-            showToast('✅ 感謝你的回報！我們會盡快處理。');
+            document.getElementById('report-email').value = ''; document.getElementById('report-desc').value = '';
+            closeModal('report-modal'); showToast('✅ 感謝你的回報！我們會盡快處理。');
         }
 
         function submitContact() {
@@ -797,126 +716,51 @@
             const name = document.getElementById('contact-name').value.trim();
             const email = document.getElementById('contact-email').value.trim();
             const message = document.getElementById('contact-message').value.trim();
-
-            if (!email || !message) {
-                showToast('請填寫電郵和訊息內容');
-                return;
-            }
-
+            if (!email || !message) { showToast('請填寫電郵和訊息內容'); return; }
             const mailto = `mailto:hello@a11y-map.hk?subject=${encodeURIComponent('[' + subject + '] ' + (name || '匿名'))}&body=${encodeURIComponent(message + '\n\n---\n來自: ' + name + ' <' + email + '>')}`;
             window.location.href = mailto;
-
-            closeModal('contact-modal');
-            showToast('✅ 已開啟郵件應用程式');
+            closeModal('contact-modal'); showToast('✅ 已開啟郵件應用程式');
         }
 
         function submitVolunteer() {
             const name = document.getElementById('vol-name').value.trim();
             const contact = document.getElementById('vol-contact').value.trim();
             const interest = document.getElementById('vol-interest').value.trim();
-
-            if (!name || !contact) {
-                showToast('請填寫姓名和聯絡方式');
-                return;
-            }
-
+            if (!name || !contact) { showToast('請填寫姓名和聯絡方式'); return; }
             const volunteers = JSON.parse(localStorage.getItem('a11y_volunteers') || '[]');
-            volunteers.push({
-                name, contact, interest,
-                timestamp: new Date().toISOString()
-            });
+            volunteers.push({ name, contact, interest, timestamp: new Date().toISOString() });
             localStorage.setItem('a11y_volunteers', JSON.stringify(volunteers));
-
-            document.getElementById('vol-name').value = '';
-            document.getElementById('vol-contact').value = '';
-            document.getElementById('vol-interest').value = '';
-            closeModal('volunteer-modal');
-            showToast('✅ 歡迎加入！我們會盡快與你聯絡。');
+            document.getElementById('vol-name').value = ''; document.getElementById('vol-contact').value = ''; document.getElementById('vol-interest').value = '';
+            closeModal('volunteer-modal'); showToast('✅ 歡迎加入！我們會盡快與你聯絡。');
         }
 
-        // ============================================================
-        // 捐款處理
-        // ============================================================
         function handleDonate(method) {
             closeModal('donate-modal');
             switch(method) {
-                case 'alipayhk':
-                    document.getElementById('alipay-account-display').textContent = ALIPAYHK_ACCOUNT;
-                    openModal('alipay-modal');
-                    break;
-                case 'paypal':
-                    showToast('正在開啟 PayPal...');
-                    setTimeout(() => {
-                        // window.open('https://www.paypal.com/donate?hosted_button_id=XXX', '_blank');
-                        showToast('💡 請替換為真實的 PayPal 連結');
-                    }, 800);
-                    break;
-                case 'fps':
-                    showToast('📱 轉數快號碼：+852 XXXX XXXX');
-                    break;
-                case 'payme':
-                    showToast('💰 PayMe：+852 XXXX XXXX');
-                    break;
-                case 'bank':
-                    showToast('🏦 銀行資訊已發送至你的電郵');
-                    break;
+                case 'alipayhk': document.getElementById('alipay-account-display').textContent = ALIPAYHK_ACCOUNT; openModal('alipay-modal'); break;
+                case 'paypal': showToast('正在開啟 PayPal...'); setTimeout(() => { showToast('💡 請替換為真實的 PayPal 連結'); }, 800); break;
+                case 'fps': showToast('📱 轉數快號碼：+852 XXXX XXXX'); break;
+                case 'payme': showToast('💰 PayMe：+852 XXXX XXXX'); break;
+                case 'bank': showToast('🏦 銀行資訊已發送至你的電郵'); break;
             }
         }
 
         function copyAlipayAccount() {
-            navigator.clipboard.writeText(ALIPAYHK_ACCOUNT)
-                .then(() => showToast('✅ 電話號碼已複製！'))
-                .catch(() => prompt('請手動複製電話號碼：', ALIPAYHK_ACCOUNT));
+            navigator.clipboard.writeText(ALIPAYHK_ACCOUNT).then(() => showToast('✅ 電話號碼已複製！')).catch(() => prompt('請手動複製電話號碼：', ALIPAYHK_ACCOUNT));
         }
 
-        // ============================================================
-        // 分享功能
-        // ============================================================
         async function shareApp() {
-            const shareData = {
-                title: '順利邨・觀塘無障礙地圖',
-                text: '為輪椅使用者打造的專屬出行助手，收錄 54 個無障礙地點！',
-                url: window.location.origin + '/index.html'
-            };
-
-            if (navigator.share) {
-                try {
-                    await navigator.share(shareData);
-                    showToast('✅ 分享成功！');
-                } catch (err) {
-                    if (err.name !== 'AbortError') {
-                        fallbackCopy();
-                    }
-                }
-            } else {
-                fallbackCopy();
-            }
+            const shareData = { title: '順利邨・觀塘無障礙地圖', text: '為輪椅使用者打造的專屬出行助手，收錄 54 個無障礙地點！', url: window.location.origin + '/index.html' };
+            if (navigator.share) { try { await navigator.share(shareData); showToast('✅ 分享成功！'); } catch (err) { if (err.name !== 'AbortError') fallbackCopy(); } } else { fallbackCopy(); }
         }
-
         function fallbackCopy() {
             const url = window.location.origin + '/index.html';
-            navigator.clipboard.writeText(url).then(() => {
-                showToast('✅ 連結已複製到剪貼簿！');
-            }).catch(() => {
-                prompt('複製以下連結分享：', url);
-            });
+            navigator.clipboard.writeText(url).then(() => showToast('✅ 連結已複製到剪貼簿！')).catch(() => prompt('複製以下連結分享：', url));
         }
 
-        // ============================================================
-        // Toast 提示
-        // ============================================================
         let toastTimer = null;
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
-        }
+        function showToast(msg) { const toast = document.getElementById('toast'); toast.textContent = msg; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2500); }
 
-        // ============================================================
-        // 初始化
-        // ============================================================
         renderReviews();
     </script>
 </body>
